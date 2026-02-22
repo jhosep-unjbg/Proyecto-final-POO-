@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
- "scripts": {
-  "dev": "ts-node src/app.ts",
-  "build": "tsc",
-  "start": "node dist/app.js"
-},
+  "scripts": {
+    "dev": "ts-node src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -19,8 +19,9 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mysql2": "^3.17.4",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.28"
   }
-
-  
 }
