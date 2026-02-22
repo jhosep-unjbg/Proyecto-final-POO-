@@ -7,7 +7,7 @@ const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
 const PORT = 3000;
 app.get("/", (req, res) => {
-    res.send("API Hotel PA funcionando 🚀");
+    res.send("API Hotel PA funcionando ");
 });
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
