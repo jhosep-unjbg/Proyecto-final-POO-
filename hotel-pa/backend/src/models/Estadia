@@ -1,0 +1,13 @@
+import { ReservaHotel } from "./ReservaHotel";
+
+export class Estadia {
+  constructor(
+    public reserva: ReservaHotel,
+    public fechaIngreso: Date,
+    public fechaSalida: Date
+  ) {}
+
+  duracionDias(): number {
+    return (this.fechaSalida.getTime() - this.fechaIngreso.getTime()) / (1000 * 60 * 60 * 24);
+  }
+}

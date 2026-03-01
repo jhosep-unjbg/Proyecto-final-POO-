@@ -13,14 +13,20 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+<<<<<<< HEAD
     "@types/dotenv": "^6.1.1",
+=======
+>>>>>>> 9f5b2dc21898783bfc444d8a8fc09007c6b354ad
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+<<<<<<< HEAD
     "dotenv": "^17.3.1",
+=======
+>>>>>>> 9f5b2dc21898783bfc444d8a8fc09007c6b354ad
     "express": "^5.2.1",
     "mysql2": "^3.17.4",
     "reflect-metadata": "^0.2.2",
