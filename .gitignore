@@ -1,6 +1,0 @@
-# Ignorar archivos JavaScript compilados
-*.js
-*.js.map
-
-# Ignorar dependencias
-node_modules/
