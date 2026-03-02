@@ -1,0 +1,7 @@
+export enum MotivoCambioTarifa {
+  TEMPORADA = "TEMPORADA",
+  PROMOCION = "PROMOCION",
+  INFLACION = "INFLACION",
+  AJUSTE_MANUAL = "AJUSTE_MANUAL",
+  OTRO = "OTRO",
+}
