@@ -1,21 +1,35 @@
-import express from "express";
+import { Router } from "express";
+// import { PaqueteService } from "../services/PaqueteService";
+// import { FilePaqueteRepository } from "../repositories/file/FilePaqueteRepository";
 
-import habitacionRoutes from "../routes/habitacion.routes";
-import huespedRoutes from "../routes/huesped.routes";
-import reservaRoutes from "../routes/reserva.routes";
-import paqueteRoutes from "../routes/paquete.routes";
+const router = Router();
 
-const app = express();
-app.use(express.json());
+// const repo = new FilePaqueteRepository();
+// const service = new PaqueteService(repo);
 
-app.get("/health", (req, res) => {
-  res.json({ ok: true });
+router.get("/", (_req, res) => {
+  res.json([]); // luego lo conectamos al service
 });
 
+router.get("/:id", (req, res) => {
+  const id = Number(req.params.id);
+  // const p = service.obtenerPorId(id);
+  // if (!p) return res.status(404).json({ mensaje: "No encontrado" });
+  res.json({ id });
+});
 
-app.use("/habitaciones", habitacionRoutes);
-app.use("/huespedes", huespedRoutes);
-app.use("/reservas", reservaRoutes);
-app.use("/paquetes", paqueteRoutes);
+router.post("/", (req, res) => {
+  // const nuevo = service.crear(req.body);
+  res.status(201).json({ ok: true, data: req.body });
+});
 
-export default app;
+router.put("/:id", (req, res) => {
+  const id = Number(req.params.id);
+  res.json({ ok: true, id, data: req.body });
+});
+
+router.delete("/:id", (req, res) => {
+  res.json({ ok: true, id: Number(req.params.id) });
+});
+
+export default router;
