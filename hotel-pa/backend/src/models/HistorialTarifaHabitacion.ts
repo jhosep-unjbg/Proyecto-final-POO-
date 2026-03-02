@@ -1,4 +1,4 @@
-import { TipoHabitacion } from "./TipoHabitacion";
+import { TipoHabitacion } from "../models/enums/TipoHabitacion";
 import { MotivoCambioTarifa } from "./MotivoCambioTarifa";
 
 export class HistorialTarifaHabitacion {

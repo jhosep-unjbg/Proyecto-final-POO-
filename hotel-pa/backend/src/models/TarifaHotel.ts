@@ -1,4 +1,4 @@
-import { TipoHabitacion } from "./TipoHabitacion";
+import { TipoHabitacion } from "../models/enums/TipoHabitacion";
 
 export class TarifaHotel {
   constructor(

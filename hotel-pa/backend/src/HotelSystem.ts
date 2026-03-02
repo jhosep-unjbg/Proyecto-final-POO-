@@ -11,7 +11,7 @@ import { ReservaHotel } from "./models/ReservaHotel";
 import { Estadia } from "./models/Estadia";
 import { Pago } from "./models/Pago";
 import { TarifaHotel } from "./models/TarifaHotel";
-import { TipoHabitacion } from "./models/TipoHabitacion";
+import { TipoHabitacion } from "./models/enums/TipoHabitacion";
 
 export class HotelSystem {
   constructor(

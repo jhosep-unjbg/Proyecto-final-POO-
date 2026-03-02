@@ -1,4 +1,4 @@
-import { TipoHabitacion } from "./TipoHabitacion";
+import { TipoHabitacion } from "./enums/TipoHabitacion";
 
 export class Habitacion {
   constructor(

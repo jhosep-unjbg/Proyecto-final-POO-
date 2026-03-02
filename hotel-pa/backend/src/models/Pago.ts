@@ -1,4 +1,4 @@
-import { MetodoPago } from "./MetodoPago";
+import { MetodoPago } from "./enums/MetodoPago";
 
 export class Pago {
   constructor(

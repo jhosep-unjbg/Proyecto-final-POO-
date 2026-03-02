@@ -1,32 +1,32 @@
-import express from "express";
-import dotenv from "dotenv";
-import { testDBConnection } from "./config/database";
+import * as express from "express";
+import { Request, Response } from "express"
+import { RecepcionistaRepository } from "./repositories/file/FileRecepcionistaRepository";
+import { RecepcionistaService } from "./services/RecepcionistaService";
 
-dotenv.config();
+const app = express.default();
+app.use(express.json()); // 👈 IMPORTANTE para req.body
 
-const app = express();
-app.use(express.json());
+const recepRepo = new RecepcionistaRepository();
+const recepService = new RecepcionistaService(recepRepo);
 
-// Health check
-app.get("/health", (_req, res) => {
-  res.json({ ok: true, message: "Hotel API running" });
+// health
+app.get("/health", (_req: Request, res: Response) => {
+  res.json({ ok: true });
 });
 
-// (Luego) app.use("/huesped", huespedRoutes) ...
-// (Luego) app.use("/reserva", reservaRoutes) ...
-
-const PORT = Number(process.env.PORT || 3000);
-
-async function main() {
-  await testDBConnection();
-  app.listen(PORT, () => {
-    console.log(`API escuchando en http://localhost:${PORT}`);
-  });
-}
-
-main().catch((err) => {
-  console.error(" Error al iniciar la app:", err);
-  process.exit(1);
+// recepcionistas
+app.post("/recepcionistas", (req: Request, res: Response) => {
+  try {
+    const created = recepService.crear(req.body);
+    res.status(201).json(created);
+  } catch (e) {
+    res.status(400).json({ error: (e as Error).message });
+  }
 });
 
-export default app;
+app.get("/recepcionistas", (_req: Request, res: Response) => {
+  res.json(recepService.listar());
+});
+
+const PORT = Number(process.env.PORT ?? 3000);
+app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));

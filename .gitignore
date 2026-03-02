@@ -1,18 +1,12 @@
 # Node
-node_modules/
+**/node_modules/
+**/dist/
 
-# Compilación
-dist/
-
-# Variables de entorno
-.env
+# Env
+**/.env
 
 # Logs
 *.log
 
-# Datos JSON
-data/*.json
-
-# Sistema
-.DS_Store
-Thumbs.db
+# Datos JSON (si no quieres subirlos)
+**/data/*.json
