@@ -12,4 +12,13 @@ export class FileHabitacionRepository
   constructor() {
     super("habitaciones.json");
   }
+  delete(id: number): boolean {
+  const items = this.findAll();
+  const idx = items.findIndex((x: any) => x.id === id);
+  if (idx === -1) return false;
+
+  items.splice(idx, 1);
+  
+  return true;
+}
 }

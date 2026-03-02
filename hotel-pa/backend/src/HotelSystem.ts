@@ -1,79 +1,88 @@
-import { HuespedService } from "./services/HuespedService";
-import { HabitacionService } from "./services/HabitacionService";
-import { ReservaService } from "./services/ReservaService";
-import { EstadiaService } from "./services/EstadiaService";
-import { PagoService } from "./services/PagoService";
-import { TarifaService } from "./services/TarifaService";
-
 import { Huesped } from "./models/Huesped";
 import { Habitacion } from "./models/Habitacion";
 import { ReservaHotel } from "./models/ReservaHotel";
-import { Estadia } from "./models/Estadia";
 import { Pago } from "./models/Pago";
-import { TarifaHotel } from "./models/TarifaHotel";
-import { TipoHabitacion } from "./models/enums/TipoHabitacion";
+
+import { EstadoHabitacion } from "./models/enums/EstadoHabitacion";
+
+import { HuespedService, HuespedCreateInput, HuespedSearchFilter } from "./services/HuespedService";
+import { HabitacionService } from "./services/HabitacionService";
+import { ReservaService, ReservaCreateDTO } from "./services/ReservaService";
+import { PagoService } from "./services/PagoService";
+
+export type HabitacionCreateDTO = {
+  numero: string;
+  piso: number;
+  tipoHabitacionId: number;
+};
+
+export type HabitacionUpdateDTO = Partial<{
+  numero: string;
+  piso: number;
+  tipoHabitacionId: number;
+  estado: EstadoHabitacion;
+}>;
+
+export type PagoCreateDTO = {
+  reservaId: number;
+  monto: number;
+  moneda: string;
+  metodo: string;
+  referencia?: string;
+  fecha: Date;
+};
 
 export class HotelSystem {
   constructor(
     private readonly huespedService: HuespedService,
     private readonly habitacionService: HabitacionService,
     private readonly reservaService: ReservaService,
-    private readonly estadiaService: EstadiaService,
-    private readonly pagoService: PagoService,
-    private readonly tarifaService: TarifaService
+    private readonly pagoService?: PagoService
   ) {}
 
-  // ===== HUÉSPED =====
-  registrarHuesped(data: {
-    nombres: string;
-    apellidos: string;
-    dni: string;
-    telefono: string;
-    email?: string;
-  }): Huesped {
-    return this.huespedService.crear(data);
+  // =========================
+  // HUÉSPED
+  // =========================
+  crearHuesped(input: HuespedCreateInput): Huesped {
+    return this.huespedService.crear(input);
   }
 
-  buscarHuesped(filtro: {
-    nombres?: string;
-    apellidos?: string;
-    dni?: string;
-    telefono?: string;
-  }): Huesped[] {
+  buscarHuesped(filtro: HuespedSearchFilter): Huesped[] {
     return this.huespedService.buscar(filtro);
   }
 
-  // ===== HABITACIÓN =====
-  registrarHabitacion(data: Omit<Habitacion, "id">): Habitacion {
-    return this.habitacionService.crear(data);
+  // =========================
+  // HABITACIÓN
+  // =========================
+  crearHabitacion(dto: HabitacionCreateDTO): Habitacion {
+    return this.habitacionService.crear(dto);
   }
 
   listarHabitaciones(): Habitacion[] {
     return this.habitacionService.listar();
   }
 
-  // ===== TARIFAS =====
-  crearTarifa(data: Omit<TarifaHotel, "id">): TarifaHotel {
-    return this.tarifaService.crear(data);
+  obtenerHabitacionPorId(id: number): Habitacion | null {
+    return this.habitacionService.obtenerPorId(id);
   }
 
-  obtenerTarifaPorTipo(tipo: TipoHabitacion): TarifaHotel | null {
-    return this.tarifaService.obtenerPorTipo(tipo);
+  actualizarHabitacion(id: number, dto: HabitacionUpdateDTO): Habitacion {
+    return this.habitacionService.actualizar(id, dto);
   }
 
-  listarTarifas(): TarifaHotel[] {
-    return this.tarifaService.listar();
+  cambiarEstadoHabitacion(id: number, estado: EstadoHabitacion): Habitacion {
+    return this.habitacionService.cambiarEstado(id, estado);
   }
 
-  // ===== RESERVA =====
-  crearReserva(data: {
-    huespedId: number;
-    habitacionId: number;
-    fechaInicio: Date;
-    fechaFin: Date;
-    observaciones?: string;
-  }): ReservaHotel {
-    return this.reservaService.crear(data);
+  eliminarHabitacion(id: number): boolean {
+    return this.habitacionService.eliminar(id);
+  }
+
+  // =========================
+  // RESERVA
+  // =========================
+  crearReserva(dto: ReservaCreateDTO): ReservaHotel {
+    return this.reservaService.crear(dto);
   }
 
   confirmarReserva(id: number): ReservaHotel {
@@ -84,25 +93,11 @@ export class HotelSystem {
     return this.reservaService.cancelar(id);
   }
 
-  obtenerReservaPorId(id: number): ReservaHotel | null {
-    return this.reservaService.obtenerPorId(id);
-  }
-
-  // ===== ESTADÍA =====
-  checkIn(reservaId: number): Estadia {
-    return this.estadiaService.checkIn(reservaId);
-  }
-
-  checkOut(estadiaId: number): Estadia {
-    return this.estadiaService.checkOut(estadiaId);
-  }
-
-  // ===== PAGO =====
-  registrarPago(data: Omit<Pago, "id">): Pago {
-    return this.pagoService.crear(data);
-  }
-
-  listarPagosPorReserva(reservaId: number): Pago[] {
-    return this.pagoService.listarPorReserva(reservaId);
+  // =========================
+  // PAGO (opcional)
+  // =========================
+  registrarPago(dto: PagoCreateDTO): Pago {
+    if (!this.pagoService) throw new Error("PagoService no está configurado");
+    return this.pagoService.crear(dto as any);
   }
 }

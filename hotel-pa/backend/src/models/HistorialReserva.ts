@@ -1,4 +1,4 @@
-import { EstadoReserva } from "./EstadoReserva";
+import { EstadoReserva } from "./enums/EstadoReserva";
 
 export class HistorialReserva {
   constructor(

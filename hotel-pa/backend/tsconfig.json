@@ -11,10 +11,15 @@
   },
   "include": ["src/**/*.ts"],
   "exclude": [
-    "src/main.ts",
+    "src/services/memory", "src/main.ts",
+    "src/db/**",
+    "src/ormconfig.ts",
     "src/HotelSystem.ts",
     "src/repositories/file/FileDb.ts",
-    "src/services/buildHotelSystem.ts",
-    "src/services/memory/**"
+    "src/repositories/file/FileEstadiaRepository.ts",
+    "src/repositories/file/FileHabitacionRepository.ts",
+    "src/repositories/file/FilePagoRepository.ts",
+    "src/repositories/file/FileReservaRepository.ts",
+    "src/repositories/file/FileTarifaRepository.ts"
   ]
 }

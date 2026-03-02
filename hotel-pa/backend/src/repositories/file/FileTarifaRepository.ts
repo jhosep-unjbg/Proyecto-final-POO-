@@ -13,6 +13,10 @@ export class FileTarifaRepository
 
   findByTipo(tipo: TipoHabitacion): TarifaHotel | null {
     const items = this.findAll();
-    return items.find(t => (t as any).tipoHabitacion === tipo) ?? null;
+
+    // Ajusta el nombre de la propiedad según tu modelo TarifaHotel:
+    // - si es "tipoHabitacion" => usa eso
+    // - si es "tipo" => cambia abajo a t.tipo
+    return items.find(t => t.tipoHabitacion === tipo) ?? null;
   }
 }

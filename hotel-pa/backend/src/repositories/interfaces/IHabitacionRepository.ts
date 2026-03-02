@@ -6,5 +6,5 @@ export interface IHabitacionRepository {
 
   create(data: Omit<Habitacion, "id">): Habitacion;
   update(entity: Habitacion): Habitacion;
-  delete(id: number): void;
+ delete(id: number): boolean;
 }
