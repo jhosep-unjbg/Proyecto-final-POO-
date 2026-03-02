@@ -6,6 +6,7 @@ export class Habitacion {
     public numero: string,
     public piso: number,
     public tipoHabitacionId: number,
+    public precioPorNoche: number,
     public estado: EstadoHabitacion
   ) {}
 }

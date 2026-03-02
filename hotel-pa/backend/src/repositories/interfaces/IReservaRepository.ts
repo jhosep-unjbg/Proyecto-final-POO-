@@ -8,5 +8,5 @@ export interface IReservaRepository {
   create(data: Omit<ReservaHotel, "id">): ReservaHotel;
 
   update(entity: ReservaHotel): ReservaHotel;
-  delete(id: number): void;
+  delete(id: number): boolean;
 }

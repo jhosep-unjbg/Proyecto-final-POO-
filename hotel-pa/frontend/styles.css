@@ -1,0 +1,141 @@
+:root {
+  --bg: #0f172a;
+  --card: #111827;
+  --muted: #94a3b8;
+  --text: #e5e7eb;
+  --accent: #22c55e;
+  --accent-2: #3b82f6;
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 55%);
+  color: var(--text);
+}
+
+.topbar {
+  padding: 18px 24px;
+  border-bottom: 1px solid #1f2937;
+  background: rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.topbar p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.status-dot {
+  padding: 8px 12px;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  color: #f8fafc;
+  background: #334155;
+  font-size: 0.9rem;
+}
+
+.status-dot.online {
+  background: #14532d;
+  border-color: #22c55e;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 16px;
+  padding: 18px;
+}
+
+.card {
+  background: linear-gradient(180deg, #111827, #0b1220);
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.config-card {
+  grid-column: 1 / -1;
+}
+
+h2 { margin-top: 0; }
+
+.grid-form {
+  display: grid;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+input,
+button {
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #0b1220;
+  color: var(--text);
+  padding: 10px 12px;
+}
+
+input { width: 100%; }
+
+button {
+  width: fit-content;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  border: 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover { filter: brightness(1.08); }
+
+.actions-row { margin-top: 10px; }
+
+.list {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.item {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 10px;
+  background: #0b1220;
+  line-height: 1.4;
+}
+
+.mt { margin-top: 10px; }
+
+#toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 12px;
+  display: none;
+  z-index: 40;
+}

@@ -13,7 +13,7 @@ export interface IHuespedRepository {
 
   create(data: Omit<Huesped, "id">): Huesped;
   update(entity: Huesped): Huesped;
-  delete(id: number): void;
+  delete(id: number): boolean;
 
   // opcionales
   findByDni?(dni: string): Huesped | null;

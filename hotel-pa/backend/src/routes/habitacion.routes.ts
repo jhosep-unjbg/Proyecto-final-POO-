@@ -13,7 +13,6 @@ router.get("/", (req, res) => {
 });
 
 router.get("/disponibles", (req, res) => {
-  // Si no tienes getDisponibles en el service nuevo, lo filtramos aquí:
   const disponibles = service.listar().filter(h => h.estado === EstadoHabitacion.DISPONIBLE);
   res.json(disponibles);
 });
@@ -52,6 +51,20 @@ router.patch("/:id/estado", (req, res) => {
     res.json(actualizada);
   } catch (e: any) {
     res.status(400).json({ mensaje: e.message });
+  }
+});
+
+router.patch("/:id/precio", (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { precioPorNoche } = req.body as { precioPorNoche: number };
+    const rol = String(req.header("x-rol") ?? "");
+    const adminUsuario = String(req.header("x-admin-usuario") ?? "admin");
+    const actualizada = service.cambiarPrecio(id, Number(precioPorNoche), rol, adminUsuario);
+    res.json(actualizada);
+  } catch (e: any) {
+    const status = e.message.includes("Solo el administrador") ? 403 : 400;
+    res.status(status).json({ mensaje: e.message });
   }
 });
 

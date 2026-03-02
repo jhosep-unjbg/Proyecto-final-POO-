@@ -14,12 +14,14 @@ export type HabitacionCreateDTO = {
   numero: string;
   piso: number;
   tipoHabitacionId: number;
+  precioPorNoche: number;
 };
 
 export type HabitacionUpdateDTO = Partial<{
   numero: string;
   piso: number;
   tipoHabitacionId: number;
+  precioPorNoche: number;
   estado: EstadoHabitacion;
 }>;
 
