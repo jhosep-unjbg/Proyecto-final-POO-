@@ -2,13 +2,7 @@ export class Estadia {
   constructor(
     public id: number,
     public reservaId: number,
-    public checkIn: Date,
-    public checkOut?: Date,
-    public estado: "ACTIVA" | "FINALIZADA" = "ACTIVA"
+    public fechaCheckIn: Date,
+    public fechaCheckOut: Date | null
   ) {}
-
-  finalizar(checkOut: Date = new Date()): void {
-    this.checkOut = checkOut;
-    this.estado = "FINALIZADA";
-  }
 }

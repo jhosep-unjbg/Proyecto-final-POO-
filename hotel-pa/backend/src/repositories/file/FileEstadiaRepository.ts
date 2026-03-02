@@ -1,17 +1,25 @@
 import { JsonRepository } from "./JsonRepository";
 import { Estadia } from "../../models/Estadia";
-import { IEstadiaRepository } from "../interfaces/IEstadiaRepository";
 
-export class FileEstadiaRepository
-  extends JsonRepository<Estadia>
-  implements IEstadiaRepository
-{
+export class FileEstadiaRepository extends JsonRepository<Estadia> {
   constructor() {
     super("estadias.json");
   }
 
-  findByReserva(reservaId: number): Estadia | null {
-    const items = this.findAll();
-    return items.find(e => e.reservaId === reservaId) ?? null;
+  private hydrate(e: Estadia): Estadia {
+    return {
+      ...e,
+      fechaCheckIn: new Date((e as any).fechaCheckIn),
+      fechaCheckOut: (e as any).fechaCheckOut ? new Date((e as any).fechaCheckOut) : null,
+    };
+  }
+
+  override findAll(): Estadia[] {
+    return super.findAll().map(e => this.hydrate(e));
+  }
+
+  override findById(id: number): Estadia | null {
+    const e = super.findById(id);
+    return e ? this.hydrate(e) : null;
   }
 }

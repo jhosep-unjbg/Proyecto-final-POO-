@@ -1,4 +1,5 @@
 import express from "express";
+import estadiaRoutes from "./routes/estadia.routes";
 
 import habitacionRoutes from "./routes/habitacion.routes";
 import huespedRoutes from "./routes/huesped.routes";
@@ -12,7 +13,7 @@ app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
 
-
+app.use("/estadias", estadiaRoutes);
 app.use("/habitaciones", habitacionRoutes);
 app.use("/huespedes", huespedRoutes);
 app.use("/reservas", reservaRoutes);

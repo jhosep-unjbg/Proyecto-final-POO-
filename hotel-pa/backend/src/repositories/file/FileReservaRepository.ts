@@ -10,14 +10,28 @@ export class FileReservaRepository
     super("reservas.json");
   }
 
-  // Métodos extra (opcionales, útiles)
+  private hydrate(r: ReservaHotel): ReservaHotel {
+    return {
+      ...r,
+      fechaInicio: new Date((r as any).fechaInicio),
+      fechaFin: new Date((r as any).fechaFin),
+    };
+  }
+
+  override findAll(): ReservaHotel[] {
+    return super.findAll().map(r => this.hydrate(r));
+  }
+
+  override findById(id: number): ReservaHotel | null {
+    const r = super.findById(id);
+    return r ? this.hydrate(r) : null;
+  }
+
   findByHuesped(huespedId: number): ReservaHotel[] {
-    const items = this.findAll();
-    return items.filter(r => (r as any).huespedId === huespedId);
+    return this.findAll().filter(r => r.huespedId === huespedId);
   }
 
   findByHabitacion(habitacionId: number): ReservaHotel[] {
-    const items = this.findAll();
-    return items.filter(r => (r as any).habitacionId === habitacionId);
+    return this.findAll().filter(r => r.habitacionId === habitacionId);
   }
 }
