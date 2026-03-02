@@ -1,32 +1,43 @@
-import { Turno } from "../models/enums/Turno";
 import { Recepcionista } from "../models/Recepcionista";
 import { RecepcionistaRepository } from "../repositories/file/FileRecepcionistaRepository";
+
+type RecepcionistaCreateDTO = Omit<Recepcionista, "id" | "createdAt">;
 
 export class RecepcionistaService {
   constructor(private readonly repo: RecepcionistaRepository) {}
 
-  crear(input: Omit<Recepcionista, "id" | "createdAt">): Recepcionista {
-    if (!input.nombres.trim()) throw new Error("Nombre requerido");
-    if (!input.apellidos.trim()) throw new Error("Apellidos requeridos");
-    if (!input.email.trim()) throw new Error("Email requerido");
-
-    // el repo debería crear el id internamente o devolver el creado
-    return this.repo.create({
-      ...input,
-      createdAt: new Date().toISOString(),
-    });
+  // ✅ alias para tu app.ts
+  listar(): Recepcionista[] {
+    return this.getAll();
   }
 
-  listar(): Recepcionista[] {
+  // ✅ alias para tu app.ts
+  crear(input: RecepcionistaCreateDTO): Recepcionista {
+    return this.create(input);
+  }
+
+  getAll(): Recepcionista[] {
     return this.repo.findAll();
   }
 
-  cambiarTurno(id: number, turno: Turno): Recepcionista {
-    const r = this.repo.findById(id);
-    if (!r) throw new Error("Recepcionista no existe");
+  create(input: RecepcionistaCreateDTO): Recepcionista {
+    const all = this.repo.findAll();
+    const newId = all.length > 0 ? Math.max(...all.map(r => r.id)) + 1 : 1;
 
-    const updated: Recepcionista = { ...r, turno };
-    this.repo.update(updated); // update con 1 parámetro (objeto completo)
-    return updated;
+    const nuevo: Recepcionista = {
+      id: newId,
+      ...input,
+      createdAt: new Date().toISOString()
+    };
+
+    return this.repo.create(nuevo);
+  }
+
+  update(entity: Recepcionista): Recepcionista {
+    return this.repo.update(entity);
+  }
+
+  delete(id: number): boolean {
+    return this.repo.delete(id);
   }
 }

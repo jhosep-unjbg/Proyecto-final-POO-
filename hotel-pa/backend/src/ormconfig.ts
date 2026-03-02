@@ -1,7 +1,7 @@
 import { DataSource } from "typeorm";
 import { Huesped } from "./models/Huesped";
-import { Habitacion } from "./models/TipoHabitacion";
-import { TipoHabitacion } from "./models/TipoHabitacion";
+import { Habitacion } from "./models/Habitacion";
+import { TipoHabitacion } from "./models/enums/TipoHabitacion";
 import { ReservaHotel } from "./models/ReservaHotel";
 import { PaqueteTuristico } from "./models/PaqueteTuristico";
 

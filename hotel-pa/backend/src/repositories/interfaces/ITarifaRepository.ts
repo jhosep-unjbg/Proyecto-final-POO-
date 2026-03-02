@@ -1,5 +1,5 @@
 import { TarifaHotel } from "../../models/TarifaHotel";
-import { TipoHabitacion } from "../../models/TipoHabitacion";
+import { TipoHabitacion } from "../../models/enums/TipoHabitacion";
 
 export interface ITarifaRepository {
   findAll(): TarifaHotel[];

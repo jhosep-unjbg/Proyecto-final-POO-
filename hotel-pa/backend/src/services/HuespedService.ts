@@ -1,30 +1,26 @@
 import { Huesped } from "../models/Huesped";
 import { IHuespedRepository } from "../repositories/interfaces/IHuespedRepository";
 
+export type HuespedCreateInput = {
+  nombres: string;
+  apellidos: string;
+  dni: string;
+  telefono: string;
+  email?: string;
+};
+
 export class HuespedService {
   constructor(private readonly repo: IHuespedRepository) {}
 
-  crear(data: {
-    nombres: string;
-    apellidos: string;
-    dni: string;
-    telefono: string;
-    email?: string;
-  }): Huesped {
-    if (!data.nombres) throw new Error("Nombres requeridos");
-    if (!data.apellidos) throw new Error("Apellidos requeridos");
-    if (!data.dni) throw new Error("DNI requerido");
-    if (!data.telefono) throw new Error("Telefono requerido");
+  create(input: HuespedCreateInput) {
+    const data: Omit<Huesped, "id"> = {
+      nombre: input.nombres,
+      apellido: input.apellidos,
+      dni: input.dni,
+      telefono: input.telefono,
+      email: input.email ?? ""
+    };
 
     return this.repo.create(data);
-  }
-
-  buscar(filtro: {
-    nombres?: string;
-    apellidos?: string;
-    dni?: string;
-    telefono?: string;
-  }): Huesped[] {
-    return this.repo.search(filtro);
   }
 }

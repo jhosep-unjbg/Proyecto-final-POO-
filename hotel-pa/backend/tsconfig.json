@@ -1,6 +1,22 @@
 {
   "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "rootDir": "src",
+    "outDir": "dist",
+    "strict": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
-  }
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": [
+    "src/db/**",
+    "src/ormconfig.ts",
+    "src/main.ts",
+    "src/HotelSystem.ts",
+    "src/services/memory/**",
+    "src/services/buildHotelSystem.ts",
+    "src/repositories/file/FileDb.ts"
+  ]
 }

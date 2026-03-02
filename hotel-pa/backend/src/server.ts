@@ -1,5 +1,5 @@
 import "dotenv/config";
-import app from "./app";
+import app from "../app";
 import { env } from "./config/env";
 import { connectDbIfEnabled } from "./db/connectDb";
 

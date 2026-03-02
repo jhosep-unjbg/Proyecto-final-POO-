@@ -1,12 +1,11 @@
-import { TipoHabitacion } from "./enums/TipoHabitacion";
+import { EstadoHabitacion } from "./enums/EstadoHabitacion";
 
 export class Habitacion {
   constructor(
     public id: number,
-    public numero: string, // "101", "A-12"
+    public numero: string,
     public piso: number,
-    public tipo: TipoHabitacion,
-    public capacidad: number,
-    public activa: boolean = true
+    public tipoHabitacionId: number,
+    public estado: EstadoHabitacion
   ) {}
 }

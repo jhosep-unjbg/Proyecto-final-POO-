@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { ReservaHotel } from "../models/ReservaHotel";
 import { Huesped } from "../models/Huesped";
-import { Habitacion } from "../models/TipoHabitacion";
+import { Habitacion } from "../models/Habitacion";
 import { EstadoReserva } from "../models/EstadoReserva";
 
 const router = Router();

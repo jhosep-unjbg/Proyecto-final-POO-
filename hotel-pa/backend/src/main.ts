@@ -7,8 +7,8 @@ import { EstadiaServiceMemory } from "./services/memory/EstadiaServiceMemory";
 import { PagoServiceMemory } from "./services/memory/PagoServiceMemory";
 import { TarifaServiceMemory } from "./services/memory/TarifaServiceMemory";
 
-import { TipoHabitacion } from "./models/TipoHabitacion";
-import { MetodoPago } from "./models/MetodoPago";
+import { TipoHabitacion } from "./models/enums/TipoHabitacion";
+import { MetodoPago } from "./models/enums/MetodoPago";
 
 const hotel = new HotelSystem(
   new HuespedServiceMemory(),

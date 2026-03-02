@@ -1,56 +1,65 @@
 import { Router } from "express";
-import { Habitacion } from "../models/TipoHabitacion";
-import { TipoHabitacion } from "../models/TipoHabitacion";
+import { HabitacionService } from "../services/HabitacionService";
+import { EstadoHabitacion } from "../models/enums/EstadoHabitacion"; // ajusta si tu ruta es distinta
 
 const router = Router();
-const habitaciones: Habitacion[] = [];
-const tiposHabitacion: TipoHabitacion[] = [
-  new TipoHabitacion(1, "Doble", "Dos camas", 2),
-  new TipoHabitacion(2, "Suite", "Suite deluxe", 4)
-];
+const service = new HabitacionService();
 
-// Crear Habitación
-router.post("/", (req, res) => {
-  const { numero, tipoId, precioPorNoche } = req.body;
-  const tipo = tiposHabitacion.find(t => t.id === tipoId);
-  if (!tipo) return res.status(400).json({ mensaje: "Tipo no existe" });
-
-  const nueva = new Habitacion(numero, tipo, precioPorNoche);
-  habitaciones.push(nueva);
-  res.status(201).json(nueva);
-});
-
-// Listar
 router.get("/", (req, res) => {
-  res.json(habitaciones);
+  res.json(service.getAll());
 });
 
-// Obtener por numero
-router.get("/:numero", (req, res) => {
-  const numero = Number(req.params.numero);
-  const hab = habitaciones.find(h => h.numero === numero);
-  if (!hab) return res.status(404).json({ mensaje: "No encontrada" });
-  res.json(hab);
+router.get("/disponibles", (req, res) => {
+  res.json(service.getDisponibles());
 });
 
-// Actualizar
-router.put("/:numero", (req, res) => {
-  const numero = Number(req.params.numero);
-  const hab = habitaciones.find(h => h.numero === numero);
-  if (!hab) return res.status(404).json({ mensaje: "No encontrada" });
+router.get("/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const habitacion = service.getById(id);
 
-  hab.precioPorNoche = req.body.precioPorNoche ?? hab.precioPorNoche;
-  res.json(hab);
+  if (!habitacion) return res.status(404).json({ message: "Habitación no encontrada" });
+  res.json(habitacion);
 });
 
-// Eliminar
-router.delete("/:numero", (req, res) => {
-  const numero = Number(req.params.numero);
-  const index = habitaciones.findIndex(h => h.numero === numero);
-  if (index === -1) return res.status(404).json({ mensaje: "No encontrada" });
+router.post("/", (req, res) => {
+  try {
+    const nueva = service.create(req.body);
+    res.status(201).json(nueva);
+  } catch (e: any) {
+    res.status(400).json({ message: e.message });
+  }
+});
 
-  habitaciones.splice(index, 1);
-  res.json({ mensaje: "Eliminada" });
+router.put("/:id", (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const actualizada = service.update(id, req.body);
+    res.json(actualizada);
+  } catch (e: any) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
+router.patch("/:id/estado", (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const estado = req.body.estado as EstadoHabitacion;
+    const actualizada = service.cambiarEstado(id, estado);
+    res.json(actualizada);
+  } catch (e: any) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
+router.delete("/:id", (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const ok = service.delete(id);
+    if (!ok) return res.status(404).json({ message: "Habitación no encontrada" });
+    res.json({ message: "Habitación eliminada" });
+  } catch (e: any) {
+    res.status(400).json({ message: e.message });
+  }
 });
 
 export default router;

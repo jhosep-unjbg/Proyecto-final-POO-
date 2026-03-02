@@ -1,0 +1,6 @@
+export enum EstadoHabitacion {
+  DISPONIBLE = "DISPONIBLE",
+  OCUPADA = "OCUPADA",
+  MANTENIMIENTO = "MANTENIMIENTO",
+  LIMPIEZA = "LIMPIEZA"
+}

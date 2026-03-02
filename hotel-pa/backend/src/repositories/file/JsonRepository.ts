@@ -1,63 +1,64 @@
-import path from "path";
-import { FileStore } from "./FileStore";
+import * as fs from "fs";
+import * as path from "path";
 
-export interface WithId {
-  id: number;
-}
+export class JsonRepository<T extends { id: number }> {
+  private filePath: string;
 
-export abstract class JsonRepository<T extends WithId> {
-  protected store: FileStore;
+  constructor(fileName: string) {
+    this.filePath = path.join(__dirname, "../../../data", fileName);
 
-  constructor(
-    protected fileName: string,
-    baseDir: string = path.join(process.cwd(), "data")
-  ) {
-    this.store = new FileStore(baseDir);
+    // Si el archivo no existe, lo crea
+    if (!fs.existsSync(this.filePath)) {
+      fs.writeFileSync(this.filePath, JSON.stringify([], null, 2));
+    }
   }
 
-  protected readAll(): T[] {
-    const data = this.store.read<T[]>(this.fileName);
-    return Array.isArray(data) ? data : [];
+  private readFile(): T[] {
+    const data = fs.readFileSync(this.filePath, "utf-8");
+    return JSON.parse(data) as T[];
   }
 
-  protected writeAll(items: T[]): void {
-    this.store.write(this.fileName, items);
+  private writeFile(data: T[]): void {
+    fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2));
   }
 
-  // ✅ PUBLIC + sync
   public findAll(): T[] {
-    return this.readAll();
+    return this.readFile();
   }
 
-  public findById(id: number): T | null {
-    const items = this.readAll();
-    return items.find(x => x.id === id) ?? null;
+  public findById(id: number): T | undefined {
+    return this.readFile().find((item) => item.id === id);
   }
 
-  // ✅ PUBLIC + sync + firma compatible con tus interfaces
-  public create(data: Omit<T, "id">): T {
-    const items = this.readAll();
-    const nextId =
-      items.length === 0 ? 1 : Math.max(...items.map(x => x.id)) + 1;
-
-    const entity = { id: nextId, ...data } as T;
-    items.push(entity);
-    this.writeAll(items);
+  public create(entity: T): T {
+    const data = this.readFile();
+    data.push(entity);
+    this.writeFile(data);
     return entity;
   }
 
   public update(entity: T): T {
-    const items = this.readAll();
-    const idx = items.findIndex(x => x.id === entity.id);
-    if (idx === -1) throw new Error(`No existe id=${entity.id} en ${this.fileName}`);
+    const data = this.readFile();
+    const index = data.findIndex((item) => item.id === entity.id);
 
-    items[idx] = entity;
-    this.writeAll(items);
+    if (index === -1) {
+      throw new Error("Entidad no encontrada para actualizar");
+    }
+
+    data[index] = entity;
+    this.writeFile(data);
     return entity;
   }
 
-  public delete(id: number): void {
-    const items = this.readAll();
-    this.writeAll(items.filter(x => x.id !== id));
+  public delete(id: number): boolean {
+    const data = this.readFile();
+    const newData = data.filter((item) => item.id !== id);
+
+    if (newData.length === data.length) {
+      return false;
+    }
+
+    this.writeFile(newData);
+    return true;
   }
 }
