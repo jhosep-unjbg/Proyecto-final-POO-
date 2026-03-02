@@ -1,6 +1,18 @@
-# Ignorar archivos JavaScript compilados
-*.js
-*.js.map
-
-# Ignorar dependencias
+# Node
 node_modules/
+
+# Compilación
+dist/
+
+# Variables de entorno
+.env
+
+# Logs
+*.log
+
+# Datos JSON
+data/*.json
+
+# Sistema
+.DS_Store
+Thumbs.db
