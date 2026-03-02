@@ -1,14 +1,7 @@
-import "dotenv/config";
-import app from "../app";
-import { env } from "./config/env";
-import { connectDbIfEnabled } from "./db/connectDb";
+import app from "./app";
 
-async function bootstrap() {
-  await connectDbIfEnabled();
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
-  app.listen(env.PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${env.PORT}`);
-  });
-}
-
-bootstrap();
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});

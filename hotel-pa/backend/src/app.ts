@@ -1,32 +1,21 @@
-import * as express from "express";
-import { Request, Response } from "express"
-import { RecepcionistaRepository } from "./repositories/file/FileRecepcionistaRepository";
-import { RecepcionistaService } from "./services/RecepcionistaService";
+import express from "express";
 
-const app = express.default();
-app.use(express.json()); // 👈 IMPORTANTE para req.body
+import habitacionRoutes from "./routes/habitacion.routes";
+import huespedRoutes from "./routes/huesped.routes";
+import reservaRoutes from "./routes/reserva.routes";
+import paqueteRoutes from "./routes/paquete.routes";
 
-const recepRepo = new RecepcionistaRepository();
-const recepService = new RecepcionistaService(recepRepo);
+const app = express();
+app.use(express.json());
 
-// health
-app.get("/health", (_req: Request, res: Response) => {
+app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
 
-// recepcionistas
-app.post("/recepcionistas", (req: Request, res: Response) => {
-  try {
-    const created = recepService.crear(req.body);
-    res.status(201).json(created);
-  } catch (e) {
-    res.status(400).json({ error: (e as Error).message });
-  }
-});
 
-app.get("/recepcionistas", (_req: Request, res: Response) => {
-  res.json(recepService.listar());
-});
+app.use("/habitaciones", habitacionRoutes);
+app.use("/huespedes", huespedRoutes);
+app.use("/reservas", reservaRoutes);
+app.use("/paquetes", paqueteRoutes);
 
-const PORT = Number(process.env.PORT ?? 3000);
-app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
+export default app;

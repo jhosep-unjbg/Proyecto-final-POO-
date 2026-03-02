@@ -1,5 +1,5 @@
 import { TarifaHotel } from "../../models/TarifaHotel";
-import { TipoHabitacion } from "../../models/TipoHabitacion";
+import { TipoHabitacion } from "../../models/enums/TipoHabitacion";
 import { ITarifaService } from "../contracts/TarifaService";
 import { nextId } from "./_utils";
 
