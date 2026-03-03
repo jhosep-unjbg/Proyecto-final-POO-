@@ -1,351 +1,237 @@
 const $ = (id) => document.getElementById(id);
-const baseUrlInput = $("baseUrl");
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+const baseUrl = () => localStorage.getItem("backend_url") || "http://localhost:3000";
 const toast = $("toast");
-const apiStatus = $("apiStatus");
+let charts = { ocupacion: null, ingresos: null };
+let cache = { habitaciones: [], reservas: [], estadias: [], facturas: [], huespedes: [] };
 
-const storedUrl = localStorage.getItem("backend_url");
-if (storedUrl) baseUrlInput.value = storedUrl;
-
-const pageButtons = Array.from(document.querySelectorAll(".page-btn"));
-const pagePanels = Array.from(document.querySelectorAll(".page-panel"));
-
-function showPage(page) {
-  const pageExists = pagePanels.some((panel) => panel.dataset.page === page);
-  const targetPage = pageExists ? page : "recepcion";
-
-  pagePanels.forEach((panel) => panel.classList.toggle("active", panel.dataset.page === targetPage));
-  pageButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.page === targetPage));
-
-  localStorage.setItem("frontend_page", targetPage);
-  window.location.hash = targetPage;
+function notify(msg, err = false) {
+  toast.textContent = msg;
+  toast.style.display = "block";
+  toast.style.borderColor = err ? "#dc2626" : "#16a34a";
+  setTimeout(() => (toast.style.display = "none"), 1800);
 }
 
-pageButtons.forEach((btn) => {
-  btn.addEventListener("click", () => showPage(btn.dataset.page));
-});
-
-const initialPage = window.location.hash.replace("#", "") || localStorage.getItem("frontend_page") || "recepcion";
-showPage(initialPage);
-
-window.addEventListener("hashchange", () => {
-  showPage(window.location.hash.replace("#", ""));
-});
-
-$("saveConfig").addEventListener("click", () => {
-  localStorage.setItem("backend_url", baseUrlInput.value.trim());
-  showToast("Configuración guardada");
-});
-
-$("testConnection").addEventListener("click", testConnection);
-$("loadHabitaciones").addEventListener("click", loadHabitaciones);
-$("loadHuespedes").addEventListener("click", () => loadHuespedes());
-$("loadReservas").addEventListener("click", loadReservas);
-$("loadPaquetes").addEventListener("click", loadPaquetes);
-$("loadFacturas").addEventListener("click", loadFacturas);
-$("loadEstadias").addEventListener("click", loadEstadias);
-$("loadRecepcionistas").addEventListener("click", loadRecepcionistas);
-$("loadHistorialPrecios").addEventListener("click", () => loadHistorialPrecios());
-
-$("habitacionForm").addEventListener("submit", onCrearHabitacion);
-$("precioForm").addEventListener("submit", onCambiarPrecio);
-$("huespedForm").addEventListener("submit", onCrearHuesped);
-$("buscarHuespedForm").addEventListener("submit", onBuscarHuespedes);
-$("recepcionistaForm").addEventListener("submit", onCrearRecepcionista);
-$("reservaForm").addEventListener("submit", onCrearReserva);
-$("paqueteForm").addEventListener("submit", onCrearPaquete);
-$("checkinForm").addEventListener("submit", onCheckin);
-$("checkoutForm").addEventListener("submit", onCheckout);
-$("historialPrecioForm").addEventListener("submit", onFiltrarHistorialPrecios);
-$("calculoEstadiaForm").addEventListener("submit", onCalcularEstadia);
-$("facturaEstadiaForm").addEventListener("submit", onCrearFacturaDesdeEstadia);
-
-async function onCrearHabitacion(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  await post("/habitaciones", {
-    numero: String(fd.get("numero")),
-    piso: Number(fd.get("piso")),
-    tipoHabitacionId: Number(fd.get("tipoHabitacionId")),
-    precioPorNoche: Number(fd.get("precioPorNoche")),
+async function api(path, opts = {}) {
+  const r = await fetch(baseUrl() + path, {
+    headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
+    ...opts,
   });
-  e.target.reset();
-  loadHabitaciones();
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.mensaje || "Error API");
+  return data;
 }
 
-async function onCambiarPrecio(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const habitacionId = Number(fd.get("habitacionId"));
-  await patch(
-    `/habitaciones/${habitacionId}/precio`,
-    { precioPorNoche: Number(fd.get("precioPorNoche")) },
-    { "x-rol": "admin", "x-admin-usuario": String(fd.get("adminUsuario")) }
-  );
-  e.target.reset();
-  await Promise.all([loadHabitaciones(), loadHistorialPrecios()]);
+function setView(view) {
+  $$(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
+  $$(".view").forEach((v) => v.classList.toggle("active", v.dataset.view === view));
 }
 
-async function onCrearHuesped(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  await post("/huespedes", {
-    nombres: String(fd.get("nombres")),
-    apellidos: String(fd.get("apellidos")),
-    dni: String(fd.get("dni")),
-    telefono: String(fd.get("telefono")),
-    email: String(fd.get("email") || ""),
+function bindLayout() {
+  $$(".nav-item").forEach((btn) => btn.addEventListener("click", () => setView(btn.dataset.view)));
+  $("sidebarToggle").addEventListener("click", () => $("sidebar").classList.toggle("collapsed"));
+  $("themeToggle").addEventListener("click", () => {
+    const next = document.body.dataset.theme === "dark" ? "light" : "dark";
+    document.body.dataset.theme = next;
+    localStorage.setItem("theme", next);
   });
-  e.target.reset();
-  loadHuespedes();
+  document.body.dataset.theme = localStorage.getItem("theme") || "dark";
 }
 
-async function onBuscarHuespedes(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  await loadHuespedes({
-    nombres: String(fd.get("nombres") || ""),
-    apellidos: String(fd.get("apellidos") || ""),
-    dni: String(fd.get("dni") || ""),
-    telefono: String(fd.get("telefono") || ""),
+function monthKey(dateStr) {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function renderDashboard() {
+  const total = cache.habitaciones.length;
+  const ocupadas = cache.habitaciones.filter((h) => String(h.estado).toUpperCase().includes("OCUP")).length;
+  const disponibles = Math.max(0, total - ocupadas);
+  const activas = cache.reservas.filter((r) => String(r.estado).toUpperCase() !== "CANCELADA").length;
+  const hoy = new Date().toISOString().slice(0, 10);
+  const ingresoHoy = cache.facturas
+    .filter((f) => String(f.fecha || "").slice(0, 10) === hoy)
+    .reduce((a, b) => a + Number(b.total || 0), 0);
+
+  $("kpiCards").innerHTML = `
+    <div class="kpi"><span>Total habitaciones</span><b>${total}</b></div>
+    <div class="kpi"><span>Disponibles / Ocupadas</span><b>${disponibles} / ${ocupadas}</b></div>
+    <div class="kpi"><span>Reservas activas</span><b>${activas}</b></div>
+    <div class="kpi"><span>Ingresos del día</span><b>S/ ${ingresoHoy.toFixed(2)}</b></div>`;
+
+  const meses = [...new Set([...cache.estadias.map((e) => monthKey(e.fechaCheckIn)), ...cache.facturas.map((f) => monthKey(f.fecha))])].sort();
+  const ocupacion = meses.map((m) => cache.estadias.filter((e) => monthKey(e.fechaCheckIn) === m).length);
+  const ingresos = meses.map((m) => cache.facturas.filter((f) => monthKey(f.fecha) === m).reduce((a, b) => a + Number(b.total || 0), 0));
+
+  charts.ocupacion?.destroy();
+  charts.ingresos?.destroy();
+  charts.ocupacion = new Chart($("ocupacionChart"), {
+    type: "bar",
+    data: { labels: meses, datasets: [{ label: "Ocupación mensual", data: ocupacion, backgroundColor: "#1d7d6a" }] },
+    options: { responsive: true, plugins: { legend: { display: false } } },
+  });
+  charts.ingresos = new Chart($("ingresosChart"), {
+    type: "line",
+    data: { labels: meses, datasets: [{ label: "Ingresos por mes", data: ingresos, borderColor: "#c7a14a", tension: .35 }] },
+    options: { responsive: true },
   });
 }
 
-async function onCrearRecepcionista(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  await post("/recepcionistas", {
-    nombres: String(fd.get("nombres")),
-    apellidos: String(fd.get("apellidos")),
-    email: String(fd.get("email")),
-    turno: String(fd.get("turno")),
+function renderHabitaciones() {
+  const search = $("habitacionSearch").value.toLowerCase();
+  const tipo = $("habitacionTipoFiltro").value;
+  const estado = $("habitacionEstadoFiltro").value;
+  const items = cache.habitaciones.filter((h) => {
+    const okSearch = String(h.numero).toLowerCase().includes(search);
+    const okTipo = !tipo || String(h.tipoHabitacionId) === tipo;
+    const okEstado = !estado || String(h.estado) === estado;
+    return okSearch && okTipo && okEstado;
   });
-  e.target.reset();
-  loadRecepcionistas();
+  $("habitacionesTable").innerHTML = items
+    .map((h) => `<tr><td>${h.numero}</td><td>${h.tipoHabitacionId}</td><td>${h.estado}</td><td>S/ ${Number(h.precioPorNoche).toFixed(2)}</td></tr>`)
+    .join("");
+
+  const tipos = [...new Set(cache.habitaciones.map((h) => String(h.tipoHabitacionId)))];
+  const estados = [...new Set(cache.habitaciones.map((h) => String(h.estado)))];
+  $("habitacionTipoFiltro").innerHTML = `<option value="">Todos los tipos</option>${tipos.map((t) => `<option ${tipo===t?"selected":""} value="${t}">${t}</option>`).join("")}`;
+  $("habitacionEstadoFiltro").innerHTML = `<option value="">Todos los estados</option>${estados.map((e) => `<option ${estado===e?"selected":""} value="${e}">${e}</option>`).join("")}`;
 }
 
-async function onCrearReserva(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  await post("/reservas", {
-    huespedId: Number(fd.get("huespedId")),
-    habitacionId: Number(fd.get("habitacionId")),
-    fechaInicio: String(fd.get("fechaInicio")),
-    fechaFin: String(fd.get("fechaFin")),
+function renderHuespedes() {
+  const q = $("huespedSearch").value.toLowerCase();
+  const items = cache.huespedes.filter((h) => `${h.nombre} ${h.apellido} ${h.dni} ${h.telefono}`.toLowerCase().includes(q));
+  $("huespedesList").innerHTML = items
+    .map((h) => `<article class="card"><b>${h.nombre} ${h.apellido}</b><div>DNI: ${h.dni}</div><div>Tel: ${h.telefono}</div></article>`)
+    .join("");
+}
+
+function badgeEstado(estado) {
+  const e = String(estado || "").toUpperCase();
+  if (e.includes("CONF")) return `<span class="status ok">${estado}</span>`;
+  if (e.includes("CANCEL")) return `<span class="status bad">${estado}</span>`;
+  return `<span class="status pending">${estado}</span>`;
+}
+
+function renderReservas() {
+  $("reservasTable").innerHTML = cache.reservas
+    .map((r) => `<tr>
+      <td>${r.id}</td><td>${r.huespedId}</td><td>${r.habitacionId}</td>
+      <td>${new Date(r.fechaInicio).toLocaleDateString()} - ${new Date(r.fechaFin).toLocaleDateString()}</td>
+      <td>${badgeEstado(r.estado)}</td>
+      <td><button onclick="confirmarReserva(${r.id})">Confirmar</button> <button onclick="cancelarReserva(${r.id})">Cancelar</button></td>
+    </tr>`)
+    .join("");
+}
+
+function renderEstadias() {
+  $("estadiasList").innerHTML = cache.estadias
+    .map((e) => `<article class="card"><b>Estadía #${e.id}</b><div>Reserva: ${e.reservaId}</div><div>Check-in: ${new Date(e.fechaCheckIn).toLocaleString()}</div><div>Check-out: ${e.fechaCheckOut ? new Date(e.fechaCheckOut).toLocaleString() : "Pendiente"}</div></article>`)
+    .join("");
+}
+
+function renderPagos() {
+  const from = $("pagoDesde").value;
+  const to = $("pagoHasta").value;
+  let pagos = [...cache.facturas];
+  if (from) pagos = pagos.filter((p) => String(p.fecha).slice(0, 10) >= from);
+  if (to) pagos = pagos.filter((p) => String(p.fecha).slice(0, 10) <= to);
+  $("pagosList").innerHTML = pagos
+    .map((p) => `<article class="card"><b>${p.numero || "FACTURA"}</b><div>Fecha: ${new Date(p.fecha).toLocaleDateString()}</div><div>Total: S/ ${Number(p.total || 0).toFixed(2)}</div><div>${Number(p.total || 0) > 0 ? '<span class="status ok">Completado</span>' : '<span class="status pending">Pendiente</span>'}</div></article>`)
+    .join("");
+}
+
+async function renderReportes() {
+  const hist = await api("/habitaciones/historial/precios").catch(() => []);
+  $("historialPreciosList").innerHTML = hist.slice(-8).reverse().map((h) => `<div>Hab ${h.habitacionId}: S/${h.precioAnterior} → S/${h.precioNuevo}</div>`).join("") || "Sin historial";
+  const ingresosTotal = cache.facturas.reduce((a, b) => a + Number(b.total || 0), 0);
+  $("reportesResumen").innerHTML = `<p>Facturas emitidas: <b>${cache.facturas.length}</b></p><p>Ingresos acumulados: <b>S/ ${ingresosTotal.toFixed(2)}</b></p><p>Estadías registradas: <b>${cache.estadias.length}</b></p>`;
+}
+
+function bindForms() {
+  $("habitacionSearch").addEventListener("input", renderHabitaciones);
+  $("habitacionTipoFiltro").addEventListener("change", renderHabitaciones);
+  $("habitacionEstadoFiltro").addEventListener("change", renderHabitaciones);
+  $("huespedSearch").addEventListener("input", renderHuespedes);
+  $("filtrarPagos").addEventListener("click", renderPagos);
+
+  $("openHabitacionModal").addEventListener("click", () => $("habitacionModal").classList.remove("hidden"));
+  $("closeHabitacionModal").addEventListener("click", () => $("habitacionModal").classList.add("hidden"));
+
+  $("habitacionForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    await api("/habitaciones", { method: "POST", body: JSON.stringify({ numero: String(fd.get("numero")), piso: Number(fd.get("piso")), tipoHabitacionId: Number(fd.get("tipoHabitacionId")), precioPorNoche: Number(fd.get("precioPorNoche")) }) });
+    $("habitacionModal").classList.add("hidden");
+    await loadAll();
+    notify("Habitación registrada");
   });
-  e.target.reset();
-  loadReservas();
-}
 
-async function onCrearPaquete(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  await post("/paquetes", {
-    nombre: String(fd.get("nombre")),
-    descripcion: String(fd.get("descripcion")),
-    precio: Number(fd.get("precio")),
-    moneda: String(fd.get("moneda") || "PEN"),
+  const reservaForm = $("reservaForm");
+  const val = $("reservaValidation");
+  reservaForm.addEventListener("input", () => {
+    const fd = new FormData(reservaForm);
+    const fi = fd.get("fechaInicio");
+    const ff = fd.get("fechaFin");
+    if (!fi || !ff) return (val.textContent = "");
+    val.textContent = new Date(ff) >= new Date(fi) ? "Fechas válidas" : "Fecha fin no puede ser menor a fecha inicio";
   });
-  e.target.reset();
-  loadPaquetes();
-}
-
-async function onCheckin(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  await post("/estadias/checkin", { reservaId: Number(fd.get("reservaId")) });
-  e.target.reset();
-  loadEstadias();
-}
-
-async function onCheckout(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  await post("/estadias/checkout", { estadiaId: Number(fd.get("estadiaId")) });
-  e.target.reset();
-  loadEstadias();
-}
-
-async function onCalcularEstadia(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const estadiaId = Number(fd.get("estadiaId"));
-  const resumen = await get(`/facturas/calcular/estadia/${estadiaId}`);
-  $("resumenCobro").innerHTML = `<div class="item"><b>Estadía #${resumen.estadiaId}</b><br/>Reserva: ${resumen.reservaId} · Habitación: ${resumen.habitacionId}<br/>Noches: ${resumen.noches} · Precio noche: S/ ${resumen.precioPorNoche}<br/><b>Total a pagar: S/ ${resumen.total}</b></div>`;
-}
-
-async function onCrearFacturaDesdeEstadia(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const estadiaId = Number(fd.get("estadiaId"));
-  const numero = String(fd.get("numero") || "").trim();
-  await post(`/facturas/desde-estadia/${estadiaId}`, numero ? { numero } : {});
-  e.target.reset();
-  $("resumenCobro").innerHTML = "";
-  loadFacturas();
-}
-
-async function onFiltrarHistorialPrecios(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const habitacionId = String(fd.get("habitacionId") || "").trim();
-  await loadHistorialPrecios(habitacionId ? Number(habitacionId) : undefined);
-}
-
-async function loadHabitaciones() {
-  const data = await get("/habitaciones");
-  $("habitacionesList").innerHTML = data
-    .map((h) => `<div class="item"><b>#${h.id}</b> Hab. ${h.numero} · Piso ${h.piso}<br/>Estado: ${h.estado} · S/ ${h.precioPorNoche}</div>`)
-    .join("");
-}
-
-async function loadHuespedes(filtros = {}) {
-  const query = new URLSearchParams();
-  Object.entries(filtros).forEach(([key, value]) => {
-    if (String(value || "").trim() !== "") query.append(key, String(value));
+  reservaForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(reservaForm);
+    if (new Date(String(fd.get("fechaFin"))) < new Date(String(fd.get("fechaInicio")))) return notify("Rango de fechas inválido", true);
+    await api("/reservas", { method: "POST", body: JSON.stringify({ huespedId: Number(fd.get("huespedId")), habitacionId: Number(fd.get("habitacionId")), fechaInicio: String(fd.get("fechaInicio")), fechaFin: String(fd.get("fechaFin")) }) });
+    reservaForm.reset();
+    await loadAll();
+    notify("Reserva creada");
   });
-  const data = await get(`/huespedes${query.toString() ? `?${query.toString()}` : ""}`);
-  $("huespedesList").innerHTML = data
-    .map((h) => `<div class="item"><b>#${h.id}</b> ${h.nombre} ${h.apellido}<br/>DNI: ${h.dni} · Tel: ${h.telefono}</div>`)
-    .join("");
-}
 
-async function loadRecepcionistas() {
-  const data = await get("/recepcionistas");
-  $("recepcionistasList").innerHTML = data
-    .map((r) => `<div class="item"><b>#${r.id}</b> ${r.nombres} ${r.apellidos}<br/>${r.email} · Turno: ${r.turno}<br/>Estado: ${r.activo ? "✅ En turno" : "⏸️ Fuera de turno"}<br/><button onclick="marcarTurno(${r.id})">${r.activo ? "Marcar salida" : "Marcar ingreso"}</button></div>`)
-    .join("");
-}
+  $("checkinForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = Number(new FormData(e.target).get("reservaId"));
+    await api("/estadias/checkin", { method: "POST", body: JSON.stringify({ reservaId: id }) });
+    await loadAll();
+    notify("Check-in realizado");
+  });
 
-async function loadReservas() {
-  const data = await get("/reservas");
-  $("reservasList").innerHTML = data
-    .map((r) => `<div class="item"><b>#${r.id}</b> Huésped ${r.huespedId} · Hab ${r.habitacionId}<br/>${new Date(r.fechaInicio).toLocaleDateString()} → ${new Date(r.fechaFin).toLocaleDateString()} · ${r.estado}<br/><button onclick="confirmarReserva(${r.id})">Confirmar</button> <button onclick="cancelarReserva(${r.id})">Cancelar</button></div>`)
-    .join("");
-}
-
-async function loadPaquetes() {
-  const data = await get("/paquetes");
-  $("paquetesList").innerHTML = data
-    .map((p) => `<div class="item"><b>#${p.id}</b> ${p.nombre}<br/>${p.descripcion}<br/>${p.moneda} ${p.precio}</div>`)
-    .join("");
-}
-
-async function loadFacturas() {
-  const data = await get("/facturas");
-  $("facturasList").innerHTML = data
-    .map((f) => `<div class="item"><b>${f.numero}</b> (ID ${f.id})<br/>Reserva ${f.reservaId} · Total ${f.total}</div>`)
-    .join("");
-}
-
-async function loadEstadias() {
-  const data = await get("/estadias");
-  $("estadiasList").innerHTML = data
-    .map((e) => `<div class="item"><b>#${e.id}</b> Reserva ${e.reservaId}<br/>Check-in: ${new Date(e.fechaCheckIn).toLocaleString()}<br/>Check-out: ${e.fechaCheckOut ? new Date(e.fechaCheckOut).toLocaleString() : "Pendiente"}</div>`)
-    .join("");
-}
-
-async function loadHistorialPrecios(habitacionId) {
-  const query = habitacionId ? `?habitacionId=${habitacionId}` : "";
-  const data = await get(`/habitaciones/historial/precios${query}`);
-  $("historialPreciosList").innerHTML = data
-    .map((h) => `<div class="item"><b>#${h.id}</b> Habitación ${h.habitacionId}<br/>S/ ${h.precioAnterior} → S/ ${h.precioNuevo}<br/>Admin: ${h.adminUsuario} · ${new Date(h.fechaCambio).toLocaleString()}</div>`)
-    .join("");
+  $("checkoutForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = Number(new FormData(e.target).get("estadiaId"));
+    await api("/estadias/checkout", { method: "POST", body: JSON.stringify({ estadiaId: id }) });
+    await loadAll();
+    notify("Check-out realizado");
+  });
 }
 
 window.confirmarReserva = async (id) => {
-  await patch(`/reservas/${id}/confirmar`, {});
-  loadReservas();
+  await api(`/reservas/${id}/confirmar`, { method: "PATCH", body: JSON.stringify({}) });
+  await loadAll();
 };
-
 window.cancelarReserva = async (id) => {
-  await patch(`/reservas/${id}/cancelar`, {});
-  loadReservas();
+  await api(`/reservas/${id}/cancelar`, { method: "PATCH", body: JSON.stringify({}) });
+  await loadAll();
 };
 
-window.marcarTurno = async (id) => {
-  await patch(`/recepcionistas/${id}/turno`, {});
-  loadRecepcionistas();
-};
-
-async function testConnection() {
-  try {
-    await get("/health");
-    apiStatus.textContent = "Conectado";
-    apiStatus.classList.add("online");
-    showToast("Backend conectado");
-  } catch (e) {
-    apiStatus.textContent = "Desconectado";
-    apiStatus.classList.remove("online");
-    showToast(e.message || "Sin conexión", true);
-  }
+async function loadAll() {
+  const [habitaciones, reservas, estadias, facturas, huespedes] = await Promise.all([
+    api("/habitaciones").catch(() => []),
+    api("/reservas").catch(() => []),
+    api("/estadias").catch(() => []),
+    api("/facturas").catch(() => []),
+    api("/huespedes").catch(() => []),
+  ]);
+  cache = { habitaciones, reservas, estadias, facturas, huespedes };
+  renderDashboard();
+  renderHabitaciones();
+  renderHuespedes();
+  renderReservas();
+  renderEstadias();
+  renderPagos();
+  renderReportes();
 }
 
-function apiBase() {
-  return baseUrlInput.value.trim().replace(/\/$/, "");
-}
-
-async function get(path) {
-  const r = await fetch(apiBase() + path);
-  const data = await parseJson(r);
-  if (!r.ok) throw new Error(data.mensaje || "Error");
-  return data;
-}
-
-async function post(path, payload) {
-  const r = await fetch(apiBase() + path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await parseJson(r);
-  if (!r.ok) {
-    showToast(data.mensaje || "Error", true);
-    throw new Error(data.mensaje || "Error");
-  }
-  showToast("Operación exitosa");
-  return data;
-}
-
-async function patch(path, payload, extraHeaders = {}) {
-  const r = await fetch(apiBase() + path, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", ...extraHeaders },
-    body: JSON.stringify(payload),
-  });
-  const data = await parseJson(r);
-  if (!r.ok) {
-    showToast(data.mensaje || "Error", true);
-    throw new Error(data.mensaje || "Error");
-  }
-  showToast("Cambio aplicado");
-  return data;
-}
-
-async function parseJson(response) {
-  try {
-    return await response.json();
-  } catch {
-    return {};
-  }
-}
-
-function showToast(message, isError = false) {
-  toast.textContent = message;
-  toast.style.display = "block";
-  toast.style.borderColor = isError ? "#ef4444" : "#22c55e";
-  setTimeout(() => {
-    toast.style.display = "none";
-  }, 2200);
-}
-
-Promise.allSettled([
-  testConnection(),
-  loadHabitaciones(),
-  loadHuespedes(),
-  loadReservas(),
-  loadPaquetes(),
-  loadFacturas(),
-  loadEstadias(),
-  loadRecepcionistas(),
-  loadHistorialPrecios(),
-]);
+(async function init() {
+  bindLayout();
+  bindForms();
+  await loadAll();
+})();
