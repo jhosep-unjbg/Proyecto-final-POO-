@@ -99,6 +99,14 @@ export class HabitacionService {
     return this.repository.update(actualizado);
   }
 
+
+  historialCambiosPrecio(habitacionId?: number): CambioPrecioHabitacion[] {
+    if (habitacionId != null) {
+      return this.cambiosPrecioRepository.findByHabitacionId(habitacionId);
+    }
+
+    return this.cambiosPrecioRepository.findAll();
+  }
   cambiarPrecio(id: number, nuevoPrecio: number, rolUsuario: string, adminUsuario: string): Habitacion {
     const habitacion = this.repository.findById(id);
     if (!habitacion) throw new Error("Habitación no encontrada");

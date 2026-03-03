@@ -3,134 +3,175 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hotel PA | Gestión Integral</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <title>Hotel Management Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="./css/styles.css" />
   </head>
-  <body>
+  <body data-theme="dark">
     <header class="topbar">
-      <div>
-        <h1>🏨 Hotel PA - Gestión Integral</h1>
-        <p>Frontend conectado al backend para operaciones de recepción y administración.</p>
+      <div class="brand">
+        <div class="monogram">PA</div>
+        <div>
+          <h1>Hotel Management Suite</h1>
+          <p>Plataforma ejecutiva de operación hotelera</p>
+        </div>
       </div>
-      <div class="status-wrap">
-        <span id="apiStatus" class="status-dot">Desconectado</span>
+      <div class="top-actions">
+        <input id="quickDate" type="date" class="date-input" />
+        <button id="notificationBtn" class="icon-btn" aria-label="Notificaciones">🔔</button>
+        <button id="themeToggle" class="icon-btn" aria-label="Tema">☀️</button>
+        <div class="profile">
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Avatar" />
+          <div><b>Gerencia</b><small>Administrador</small></div>
+        </div>
       </div>
     </header>
 
-    <main class="layout">
-      <section class="card config-card">
-        <h2>⚙️ Configuración</h2>
-        <label for="baseUrl">URL Backend</label>
-        <div class="row">
-          <input id="baseUrl" value="http://localhost:3000" />
-          <button id="saveConfig">Guardar</button>
-          <button id="testConnection">Probar conexión</button>
-        </div>
-      </section>
+    <main class="shell">
+      <aside id="sidebar" class="sidebar">
+        <button id="sidebarToggle" class="collapse">≡</button>
+        <button class="nav active" data-view="dashboard">◈ <span>Dashboard</span></button>
+        <button class="nav" data-view="reservas">◈ <span>Reservas</span></button>
+        <button class="nav" data-view="habitaciones">◈ <span>Habitaciones</span></button>
+        <button class="nav" data-view="huespedes">◈ <span>Huéspedes</span></button>
+        <button class="nav" data-view="estadias">◈ <span>Estadías</span></button>
+        <button class="nav" data-view="pagos">◈ <span>Pagos</span></button>
+        <button class="nav" data-view="tarifas">◈ <span>Tarifas</span></button>
+        <button class="nav" data-view="reportes">◈ <span>Reportes</span></button>
+      </aside>
 
-      <section class="card">
-        <h2>🛏️ Habitaciones</h2>
-        <form id="habitacionForm" class="grid-form">
-          <input name="numero" placeholder="Número (101)" required />
-          <input name="piso" type="number" placeholder="Piso" required />
-          <input name="tipoHabitacionId" type="number" placeholder="Tipo ID" required />
-          <input name="precioPorNoche" type="number" step="0.01" placeholder="Precio" required />
-          <button type="submit">Crear habitación</button>
-        </form>
+      <section class="content">
+        <section class="view active" data-view="dashboard">
+          <article class="hero card">
+            <div>
+              <h2>Bienvenido, equipo de operación</h2>
+              <p>Resumen premium del día y estado integral del hotel.</p>
+            </div>
+            <div class="hero-metrics" id="heroMetrics"></div>
+          </article>
 
-        <form id="precioForm" class="grid-form mt">
-          <input name="habitacionId" type="number" placeholder="ID Habitación" required />
-          <input name="precioPorNoche" type="number" step="0.01" placeholder="Nuevo precio" required />
-          <input name="adminUsuario" placeholder="Admin usuario" required />
-          <button type="submit">Cambiar precio (admin)</button>
-        </form>
+          <div id="kpiGrid" class="kpi-grid"></div>
 
-        <div class="actions-row">
-          <button id="loadHabitaciones">Refrescar habitaciones</button>
-        </div>
-        <div id="habitacionesList" class="list"></div>
-      </section>
+          <section class="quick-actions card">
+            <h3>Acciones rápidas concierge</h3>
+            <div class="actions">
+              <button data-view-jump="reservas">Nueva reserva</button>
+              <button data-view-jump="estadias">Check-in</button>
+              <button data-view-jump="estadias">Check-out</button>
+              <button data-view-jump="pagos">Registrar pago</button>
+            </div>
+          </section>
 
-      <section class="card">
-        <h2>👤 Huéspedes</h2>
-        <form id="huespedForm" class="grid-form">
-          <input name="nombres" placeholder="Nombres" required />
-          <input name="apellidos" placeholder="Apellidos" required />
-          <input name="dni" placeholder="DNI" required />
-          <input name="telefono" placeholder="Teléfono" required />
-          <input name="email" placeholder="Email" />
-          <button type="submit">Crear huésped</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadHuespedes">Refrescar huéspedes</button>
-        </div>
-        <div id="huespedesList" class="list"></div>
-      </section>
+          <section class="hotel-gallery card">
+            <h3>Ambientes del hotel</h3>
+            <div class="hotel-gallery-grid">
+              <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80" alt="Lobby de hotel" />
+              <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80" alt="Suite de hotel" />
+              <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80" alt="Habitación elegante" />
+            </div>
+          </section>
 
-      <section class="card">
-        <h2>📅 Reservas</h2>
-        <form id="reservaForm" class="grid-form">
-          <input name="huespedId" type="number" placeholder="Huésped ID" required />
-          <input name="habitacionId" type="number" placeholder="Habitación ID" required />
-          <input name="fechaInicio" type="date" required />
-          <input name="fechaFin" type="date" required />
-          <button type="submit">Crear reserva</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadReservas">Refrescar reservas</button>
-        </div>
-        <div id="reservasList" class="list"></div>
-      </section>
+          <div class="charts-grid">
+            <article class="card"><h3>Ocupación mensual</h3><canvas id="ocupacionChart"></canvas></article>
+            <article class="card"><h3>Ingresos por mes</h3><canvas id="ingresosChart"></canvas></article>
+            <article class="card"><h3>Distribución por tipo de habitación</h3><canvas id="tipoChart"></canvas></article>
+          </div>
+        </section>
 
+        <section class="view" data-view="reservas">
+          <div class="section-title"><h2>Reservas · Flujo concierge</h2></div>
+          <div class="filters card">
+            <input id="reservaSearch" placeholder="Buscar por huésped / ID" />
+            <select id="reservaEstadoFiltro"><option value="">Estado</option></select>
+            <input id="reservaDesde" type="date" />
+            <input id="reservaHasta" type="date" />
+            <select id="reservaTipoFiltro"><option value="">Tipo habitación</option></select>
+            <select id="reservaCanalFiltro"><option value="">Canal</option><option>Presencial</option><option>Online</option></select>
+            <button id="toggleCalendar">Vista calendario</button>
+          </div>
+          <div id="calendarView" class="card hidden"></div>
+          <div class="table-wrap card">
+            <table>
+              <thead><tr><th>ID</th><th>Huésped</th><th>Habitación</th><th>Fechas</th><th>Estado</th><th>Detalle</th></tr></thead>
+              <tbody id="reservasTable"></tbody>
+            </table>
+          </div>
+        </section>
 
+        <section class="view" data-view="habitaciones">
+          <div class="section-title"><h2>Habitaciones · Vista dual</h2></div>
+          <div class="split">
+            <article class="card">
+              <h3>Lista / tabla</h3>
+              <div class="filters compact">
+                <input id="habitacionSearch" placeholder="Buscar habitación" />
+                <select id="habitacionEstadoFiltro"><option value="">Estado</option></select>
+              </div>
+              <div class="table-wrap"><table><thead><tr><th>Número</th><th>Tipo</th><th>Estado</th><th>Precio</th><th>Acción</th></tr></thead><tbody id="habitacionesTable"></tbody></table></div>
+            </article>
+            <article class="card">
+              <h3>Floor view</h3>
+              <div id="floorMap" class="floor-map"></div>
+            </article>
+          </div>
+        </section>
 
-      <section class="card">
-        <h2>🛎️ Estadías</h2>
-        <form id="checkinForm" class="grid-form">
-          <input name="reservaId" type="number" placeholder="Reserva ID" required />
-          <button type="submit">Check-in</button>
-        </form>
-        <form id="checkoutForm" class="grid-form mt">
-          <input name="estadiaId" type="number" placeholder="Estadía ID" required />
-          <button type="submit">Check-out</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadEstadias">Refrescar estadías</button>
-        </div>
-        <div id="estadiasList" class="list"></div>
-      </section>
+        <section class="view" data-view="huespedes">
+          <div class="section-title"><h2>Huéspedes</h2></div>
+          <div class="card"><input id="huespedSearch" placeholder="Buscar en tiempo real" /></div>
+          <div id="huespedesList" class="cards"></div>
+        </section>
 
-      <section class="card">
-        <h2>🎒 Paquetes</h2>
-        <form id="paqueteForm" class="grid-form">
-          <input name="nombre" placeholder="Nombre" required />
-          <input name="descripcion" placeholder="Descripción" required />
-          <input name="precio" type="number" step="0.01" placeholder="Precio" required />
-          <input name="moneda" placeholder="Moneda (PEN)" value="PEN" />
-          <button type="submit">Crear paquete</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadPaquetes">Refrescar paquetes</button>
-        </div>
-        <div id="paquetesList" class="list"></div>
-      </section>
+        <section class="view" data-view="estadias">
+          <div class="section-title"><h2>Estadías</h2></div>
+          <div class="split">
+            <form id="checkinForm" class="card grid-form"><h3>Check-in</h3><input name="reservaId" type="number" placeholder="Reserva ID" required /><button type="submit">Confirmar check-in</button></form>
+            <form id="checkoutForm" class="card grid-form"><h3>Check-out</h3><input name="estadiaId" type="number" placeholder="Estadía ID" required /><button type="submit">Confirmar check-out</button></form>
+          </div>
+          <div id="estadiasList" class="cards"></div>
+        </section>
 
-      <section class="card">
-        <h2>🧾 Facturas</h2>
-        <form id="facturaForm" class="grid-form">
-          <input name="reservaId" type="number" placeholder="Reserva ID" required />
-          <input name="total" type="number" step="0.01" placeholder="Total" required />
-          <input name="numero" placeholder="Número (opcional)" />
-          <button type="submit">Crear factura</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadFacturas">Refrescar facturas</button>
-        </div>
-        <div id="facturasList" class="list"></div>
+        <section class="view" data-view="pagos">
+          <div class="section-title"><h2>Pagos · Claridad financiera</h2></div>
+          <div id="pagoStats" class="kpi-grid"></div>
+          <div class="filters card">
+            <input id="pagoDesde" type="date" />
+            <input id="pagoHasta" type="date" />
+            <button id="filtrarPagos">Filtrar</button>
+          </div>
+          <div id="pagosList" class="cards"></div>
+        </section>
+
+        <section class="view" data-view="tarifas">
+          <div class="section-title"><h2>Tarifas</h2></div>
+          <div class="card"><div id="historialPreciosList"></div></div>
+        </section>
+
+        <section class="view" data-view="reportes">
+          <div class="section-title"><h2>Reportes</h2></div>
+          <div id="reportesResumen" class="card"></div>
+          <div id="emptyState" class="card empty-state hidden">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486804.png" alt="Sin datos" />
+            <p>No hay datos suficientes para este reporte en este rango.</p>
+          </div>
+        </section>
       </section>
     </main>
 
+    <aside id="reservaDrawer" class="drawer hidden">
+      <div class="drawer-head"><h3>Detalle de reserva</h3><button id="closeDrawer">✕</button></div>
+      <div id="drawerBody"></div>
+    </aside>
+
+    <dialog id="confirmDialog" class="confirm-dialog">
+      <p id="confirmText">¿Confirmar acción?</p>
+      <div class="row"><button id="confirmOk">Confirmar</button><button id="confirmCancel">Cancelar</button></div>
+    </dialog>
+
     <div id="toast"></div>
-    <script src="./app.js"></script>
+    <script src="./js/app.js"></script>
   </body>
 </html>

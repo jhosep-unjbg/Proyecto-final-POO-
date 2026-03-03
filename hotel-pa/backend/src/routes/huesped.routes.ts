@@ -23,8 +23,23 @@ router.post("/", (req, res) => {
   }
 });
 
-router.get("/", (_req, res) => {
-  res.json(repo.findAll());
+router.get("/", (req, res) => {
+  const { nombres, apellidos, dni, telefono } = req.query;
+
+  const hayFiltros = [nombres, apellidos, dni, telefono].some((value) => value != null && String(value).trim() !== "");
+
+  if (!hayFiltros) {
+    return res.json(repo.findAll());
+  }
+
+  const resultado = service.buscar({
+    nombres: nombres != null ? String(nombres) : undefined,
+    apellidos: apellidos != null ? String(apellidos) : undefined,
+    dni: dni != null ? String(dni) : undefined,
+    telefono: telefono != null ? String(telefono) : undefined,
+  });
+
+  return res.json(resultado);
 });
 
 router.get("/:id", (req, res) => {

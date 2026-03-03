@@ -17,13 +17,6 @@ router.get("/disponibles", (req, res) => {
   res.json(disponibles);
 });
 
-router.get("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const habitacion = service.obtenerPorId(id);
-  if (!habitacion) return res.status(404).json({ mensaje: "No encontrada" });
-  res.json(habitacion);
-});
-
 router.post("/", (req, res) => {
   try {
     const nueva = service.crear(req.body);
@@ -52,6 +45,24 @@ router.patch("/:id/estado", (req, res) => {
   } catch (e: any) {
     res.status(400).json({ mensaje: e.message });
   }
+});
+
+router.get("/historial/precios", (req, res) => {
+  const habitacionIdRaw = req.query.habitacionId;
+  const habitacionId = habitacionIdRaw != null ? Number(habitacionIdRaw) : undefined;
+
+  if (habitacionIdRaw != null && Number.isNaN(habitacionId)) {
+    return res.status(400).json({ mensaje: "habitacionId inválido" });
+  }
+
+  res.json(service.historialCambiosPrecio(habitacionId));
+});
+
+router.get("/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const habitacion = service.obtenerPorId(id);
+  if (!habitacion) return res.status(404).json({ mensaje: "No encontrada" });
+  res.json(habitacion);
 });
 
 router.patch("/:id/precio", (req, res) => {
