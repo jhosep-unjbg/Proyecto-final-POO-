@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hotel PA | Gestión Integral</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
     <header class="topbar">
       <div>
         <h1>🏨 Hotel PA - Gestión Integral</h1>
-        <p>Frontend conectado al backend para operaciones de recepción y administración.</p>
+        <p>Panel profesional para recepción, hospedaje, comercial y caja.</p>
       </div>
       <div class="status-wrap">
         <span id="apiStatus" class="status-dot">Desconectado</span>
@@ -18,119 +18,226 @@
     </header>
 
     <main class="layout">
-      <section class="card config-card">
-        <h2>⚙️ Configuración</h2>
-        <label for="baseUrl">URL Backend</label>
-        <div class="row">
+      <aside class="sidebar card animated-border">
+        <h2>🧭 Páginas</h2>
+        <nav class="page-nav">
+          <button class="page-btn" data-page="recepcion">👥 Recepción</button>
+          <button class="page-btn" data-page="hospedaje">🛏️ Hospedaje</button>
+          <button class="page-btn" data-page="comercial">📅 Comercial y Caja</button>
+        </nav>
+
+        <section class="config-card">
+          <h3>⚙️ Configuración</h3>
+          <label for="baseUrl">URL Backend</label>
           <input id="baseUrl" value="http://localhost:3000" />
-          <button id="saveConfig">Guardar</button>
-          <button id="testConnection">Probar conexión</button>
-        </div>
-      </section>
+          <div class="row mt">
+            <button id="saveConfig">Guardar</button>
+            <button id="testConnection">Probar conexión</button>
+          </div>
+        </section>
 
-      <section class="card">
-        <h2>🛏️ Habitaciones</h2>
-        <form id="habitacionForm" class="grid-form">
-          <input name="numero" placeholder="Número (101)" required />
-          <input name="piso" type="number" placeholder="Piso" required />
-          <input name="tipoHabitacionId" type="number" placeholder="Tipo ID" required />
-          <input name="precioPorNoche" type="number" step="0.01" placeholder="Precio" required />
-          <button type="submit">Crear habitación</button>
-        </form>
+        <section class="hotel-gallery">
+          <h3>Vista del hotel</h3>
+          <div class="gallery-grid">
+            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=700&q=80" alt="Lobby de hotel" />
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=700&q=80" alt="Piscina de hotel" />
+            <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=700&q=80" alt="Habitación premium" />
+            <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=700&q=80" alt="Suite ejecutiva" />
+          </div>
+        </section>
+      </aside>
 
-        <form id="precioForm" class="grid-form mt">
-          <input name="habitacionId" type="number" placeholder="ID Habitación" required />
-          <input name="precioPorNoche" type="number" step="0.01" placeholder="Nuevo precio" required />
-          <input name="adminUsuario" placeholder="Admin usuario" required />
-          <button type="submit">Cambiar precio (admin)</button>
-        </form>
+      <section class="content-area">
+        <section class="page-panel" data-page="recepcion">
+          <div class="page-hero recepcion-hero">
+            <h2>Recepción</h2>
+            <p>Registra personal, controla turnos y filtra huéspedes rápidamente.</p>
+          </div>
 
-        <div class="actions-row">
-          <button id="loadHabitaciones">Refrescar habitaciones</button>
-        </div>
-        <div id="habitacionesList" class="list"></div>
-      </section>
+          <div class="section-grid">
+            <article class="card animated-border">
+              <h3>Recepcionistas</h3>
+              <form id="recepcionistaForm" class="grid-form">
+                <input name="nombres" placeholder="Nombres" required />
+                <input name="apellidos" placeholder="Apellidos" required />
+                <input name="email" type="email" placeholder="Email" required />
+                <select name="turno" required>
+                  <option value="MANANA">Mañana</option>
+                  <option value="TARDE">Tarde</option>
+                  <option value="NOCHE">Noche</option>
+                </select>
+                <button type="submit">Registrar recepcionista</button>
+              </form>
+              <div class="actions-row">
+                <button id="loadRecepcionistas">Refrescar recepcionistas</button>
+              </div>
+              <div id="recepcionistasList" class="list"></div>
+            </article>
 
-      <section class="card">
-        <h2>👤 Huéspedes</h2>
-        <form id="huespedForm" class="grid-form">
-          <input name="nombres" placeholder="Nombres" required />
-          <input name="apellidos" placeholder="Apellidos" required />
-          <input name="dni" placeholder="DNI" required />
-          <input name="telefono" placeholder="Teléfono" required />
-          <input name="email" placeholder="Email" />
-          <button type="submit">Crear huésped</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadHuespedes">Refrescar huéspedes</button>
-        </div>
-        <div id="huespedesList" class="list"></div>
-      </section>
+            <article class="card animated-border">
+              <h3>Huéspedes</h3>
+              <form id="huespedForm" class="grid-form">
+                <input name="nombres" placeholder="Nombres" required />
+                <input name="apellidos" placeholder="Apellidos" required />
+                <input name="dni" placeholder="DNI" required />
+                <input name="telefono" placeholder="Teléfono" required />
+                <input name="email" placeholder="Email" />
+                <button type="submit">Crear huésped</button>
+              </form>
 
-      <section class="card">
-        <h2>📅 Reservas</h2>
-        <form id="reservaForm" class="grid-form">
-          <input name="huespedId" type="number" placeholder="Huésped ID" required />
-          <input name="habitacionId" type="number" placeholder="Habitación ID" required />
-          <input name="fechaInicio" type="date" required />
-          <input name="fechaFin" type="date" required />
-          <button type="submit">Crear reserva</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadReservas">Refrescar reservas</button>
-        </div>
-        <div id="reservasList" class="list"></div>
-      </section>
+              <form id="buscarHuespedForm" class="grid-form mt">
+                <input name="nombres" placeholder="Buscar por nombres" />
+                <input name="apellidos" placeholder="Buscar por apellidos" />
+                <input name="dni" placeholder="Buscar por DNI" />
+                <input name="telefono" placeholder="Buscar por teléfono" />
+                <button type="submit">Buscar huésped</button>
+              </form>
 
+              <div class="actions-row">
+                <button id="loadHuespedes">Refrescar huéspedes</button>
+              </div>
+              <div id="huespedesList" class="list"></div>
+            </article>
+          </div>
+        </section>
 
+        <section class="page-panel" data-page="hospedaje">
+          <div class="page-hero hospedaje-hero">
+            <h2>Hospedaje</h2>
+            <p>Administra habitaciones, precios, historial y estadías.</p>
+          </div>
 
-      <section class="card">
-        <h2>🛎️ Estadías</h2>
-        <form id="checkinForm" class="grid-form">
-          <input name="reservaId" type="number" placeholder="Reserva ID" required />
-          <button type="submit">Check-in</button>
-        </form>
-        <form id="checkoutForm" class="grid-form mt">
-          <input name="estadiaId" type="number" placeholder="Estadía ID" required />
-          <button type="submit">Check-out</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadEstadias">Refrescar estadías</button>
-        </div>
-        <div id="estadiasList" class="list"></div>
-      </section>
+          <div class="section-grid">
+            <article class="card animated-border">
+              <h3>Habitaciones</h3>
+              <form id="habitacionForm" class="grid-form">
+                <input name="numero" placeholder="Número (101)" required />
+                <input name="piso" type="number" placeholder="Piso" required />
+                <input name="tipoHabitacionId" type="number" placeholder="Tipo ID" required />
+                <input name="precioPorNoche" type="number" step="0.01" placeholder="Precio" required />
+                <button type="submit">Crear habitación</button>
+              </form>
 
-      <section class="card">
-        <h2>🎒 Paquetes</h2>
-        <form id="paqueteForm" class="grid-form">
-          <input name="nombre" placeholder="Nombre" required />
-          <input name="descripcion" placeholder="Descripción" required />
-          <input name="precio" type="number" step="0.01" placeholder="Precio" required />
-          <input name="moneda" placeholder="Moneda (PEN)" value="PEN" />
-          <button type="submit">Crear paquete</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadPaquetes">Refrescar paquetes</button>
-        </div>
-        <div id="paquetesList" class="list"></div>
-      </section>
+              <form id="precioForm" class="grid-form mt">
+                <input name="habitacionId" type="number" placeholder="ID Habitación" required />
+                <input name="precioPorNoche" type="number" step="0.01" placeholder="Nuevo precio" required />
+                <input name="adminUsuario" placeholder="Admin usuario" required />
+                <button type="submit">Cambiar precio (admin)</button>
+              </form>
 
-      <section class="card">
-        <h2>🧾 Facturas</h2>
-        <form id="facturaForm" class="grid-form">
-          <input name="reservaId" type="number" placeholder="Reserva ID" required />
-          <input name="total" type="number" step="0.01" placeholder="Total" required />
-          <input name="numero" placeholder="Número (opcional)" />
-          <button type="submit">Crear factura</button>
-        </form>
-        <div class="actions-row">
-          <button id="loadFacturas">Refrescar facturas</button>
-        </div>
-        <div id="facturasList" class="list"></div>
+              <div class="actions-row">
+                <button id="loadHabitaciones">Refrescar habitaciones</button>
+              </div>
+              <div id="habitacionesList" class="list"></div>
+            </article>
+
+            <article class="card animated-border">
+              <h3>Historial de cambios de precio</h3>
+              <form id="historialPrecioForm" class="grid-form">
+                <input name="habitacionId" type="number" placeholder="Filtrar por ID habitación (opcional)" />
+                <button type="submit">Buscar historial</button>
+              </form>
+              <div class="actions-row">
+                <button id="loadHistorialPrecios">Ver historial completo</button>
+              </div>
+              <div id="historialPreciosList" class="list"></div>
+            </article>
+
+            <article class="card animated-border">
+              <h3>Estadías</h3>
+              <form id="checkinForm" class="grid-form">
+                <input name="reservaId" type="number" placeholder="Reserva ID" required />
+                <button type="submit">Check-in</button>
+              </form>
+              <form id="checkoutForm" class="grid-form mt">
+                <input name="estadiaId" type="number" placeholder="Estadía ID" required />
+                <button type="submit">Check-out</button>
+              </form>
+              <div class="actions-row">
+                <button id="loadEstadias">Refrescar estadías</button>
+              </div>
+              <div id="estadiasList" class="list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page-panel" data-page="comercial">
+          <div class="page-hero comercial-hero">
+            <h2>Comercial y Caja</h2>
+            <p>Reserva, paquetes y facturación automática por estadía.</p>
+          </div>
+
+          <div class="section-grid">
+            <article class="card animated-border">
+              <h3>Reservas</h3>
+              <form id="reservaForm" class="grid-form">
+                <input name="huespedId" type="number" placeholder="Huésped ID" required />
+                <input name="habitacionId" type="number" placeholder="Habitación ID" required />
+                <input name="fechaInicio" type="date" required />
+                <input name="fechaFin" type="date" required />
+                <button type="submit">Crear reserva</button>
+              </form>
+              <div class="actions-row">
+                <button id="loadReservas">Refrescar reservas</button>
+              </div>
+              <div id="reservasList" class="list"></div>
+            </article>
+
+            <article class="card animated-border">
+              <h3>Paquetes</h3>
+              <form id="paqueteForm" class="grid-form">
+                <input name="nombre" placeholder="Nombre" required />
+                <input name="descripcion" placeholder="Descripción" required />
+                <input name="precio" type="number" step="0.01" placeholder="Precio" required />
+                <input name="moneda" placeholder="Moneda (PEN)" value="PEN" />
+                <button type="submit">Crear paquete</button>
+              </form>
+              <div class="actions-row">
+                <button id="loadPaquetes">Refrescar paquetes</button>
+              </div>
+              <div id="paquetesList" class="list"></div>
+            </article>
+
+            <article class="card animated-border">
+              <h3>Facturación automática por estadía</h3>
+              <form id="calculoEstadiaForm" class="grid-form">
+                <input name="estadiaId" type="number" placeholder="Estadía ID" required />
+                <button type="submit">Calcular total</button>
+              </form>
+              <div id="resumenCobro" class="list"></div>
+
+              <form id="facturaEstadiaForm" class="grid-form mt">
+                <input name="estadiaId" type="number" placeholder="Estadía ID" required />
+                <input name="numero" placeholder="Número factura (opcional)" />
+                <button type="submit">Generar factura desde estadía</button>
+              </form>
+
+              <div class="actions-row">
+                <button id="loadFacturas">Refrescar facturas</button>
+              </div>
+              <div id="facturasList" class="list"></div>
+            </article>
+          </div>
+        </section>
       </section>
     </main>
 
+    <section class="social-float" aria-label="Redes sociales">
+      <a class="social-btn whatsapp" href="https://wa.me/51999999999" target="_blank" rel="noreferrer">
+        <img src="https://cdn.simpleicons.org/whatsapp/FFFFFF" alt="WhatsApp" />
+        <span>WhatsApp</span>
+      </a>
+      <a class="social-btn twitter" href="https://twitter.com" target="_blank" rel="noreferrer">
+        <img src="https://cdn.simpleicons.org/x/BE123C" alt="Twitter" />
+        <span>Twitter</span>
+      </a>
+      <a class="social-btn facebook" href="https://facebook.com" target="_blank" rel="noreferrer">
+        <img src="https://cdn.simpleicons.org/facebook/FACC15" alt="Facebook" />
+        <span>Facebook</span>
+      </a>
+    </section>
+
     <div id="toast"></div>
-    <script src="./app.js"></script>
+    <script src="./js/app.js"></script>
   </body>
 </html>

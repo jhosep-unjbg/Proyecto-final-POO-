@@ -1,8 +1,17 @@
 import { Router } from "express";
 import { FileFacturaRepository } from "../repositories/file/FileFacturaRepository";
+import { FileEstadiaRepository } from "../repositories/file/FileEstadiaRepository";
+import { FileReservaRepository } from "../repositories/file/FileReservaRepository";
+import { FileHabitacionRepository } from "../repositories/file/FileHabitacionRepository";
+import { CobroEstadiaService } from "../services/CobroEstadiaService";
 
 const router = Router();
 const repo = new FileFacturaRepository();
+const cobroService = new CobroEstadiaService(
+  new FileEstadiaRepository(),
+  new FileReservaRepository(),
+  new FileHabitacionRepository()
+);
 
 router.get("/", (_req, res) => {
   res.json(repo.findAll());
@@ -32,6 +41,47 @@ router.post("/", (req, res) => {
     });
 
     res.status(201).json(creada);
+  } catch (e: any) {
+    res.status(400).json({ mensaje: e.message ?? "Error" });
+  }
+});
+
+router.get("/calcular/estadia/:estadiaId", (req, res) => {
+  try {
+    const estadiaId = Number(req.params.estadiaId);
+    const resumen = cobroService.calcularTotal(estadiaId);
+    res.json(resumen);
+  } catch (e: any) {
+    res.status(400).json({ mensaje: e.message ?? "Error" });
+  }
+});
+
+router.post("/desde-estadia/:estadiaId", (req, res) => {
+  try {
+    const estadiaId = Number(req.params.estadiaId);
+    const resumen = cobroService.calcularTotal(estadiaId);
+    const all = repo.findAll();
+    const id = all.length > 0 ? Math.max(...all.map((f) => f.id)) + 1 : 1;
+    const numero = String(req.body.numero ?? `F001-${String(id).padStart(6, "0")}`);
+
+    const creada = repo.create({
+      id,
+      numero,
+      reservaId: resumen.reservaId,
+      pagoId: null,
+      fecha: String(req.body.fecha ?? new Date().toISOString()),
+      total: resumen.total,
+      items: [
+        {
+          descripcion: `Estadía #${resumen.estadiaId} - Habitación #${resumen.habitacionId}`,
+          cantidad: resumen.noches,
+          precioUnitario: resumen.precioPorNoche,
+          subtotal: resumen.total,
+        },
+      ],
+    });
+
+    res.status(201).json({ factura: creada, resumen });
   } catch (e: any) {
     res.status(400).json({ mensaje: e.message ?? "Error" });
   }
