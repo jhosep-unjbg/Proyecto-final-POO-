@@ -1,0 +1,78 @@
+src/
+├── app.ts
+├── server.ts
+├── main.ts
+├── HotelSystem.ts
+│
+├── config/
+│   └── env.ts                  (opcional)
+│
+├── db/
+│   └── database.ts             # pool mysql2/promise (cuando uses MySQL)
+│
+├── models/
+│   ├── (tus enums y clases)
+│
+├── repositories/
+│   ├── contracts/
+│   │   ├── IHuespedRepository.ts
+│   │   ├── IHabitacionRepository.ts
+│   │   ├── IReservaRepository.ts
+│   │   ├── IEstadiaRepository.ts
+│   │   ├── IPagoRepository.ts
+│   │   └── ITarifaRepository.ts
+│   │
+│   ├── memory/
+│   │   ├── HuespedRepositoryMemory.ts
+│   │   ├── HabitacionRepositoryMemory.ts
+│   │   ├── ReservaRepositoryMemory.ts
+│   │   ├── EstadiaRepositoryMemory.ts
+│   │   ├── PagoRepositoryMemory.ts
+│   │   └── TarifaRepositoryMemory.ts
+│   │
+│   └── mysql/                  # después
+│       ├── HuespedRepositoryMySQL.ts
+│       ├── HabitacionRepositoryMySQL.ts
+│       ├── ReservaRepositoryMySQL.ts
+│       ├── EstadiaRepositoryMySQL.ts
+│       ├── PagoRepositoryMySQL.ts
+│       └── TarifaRepositoryMySQL.ts
+│
+├── services/
+│   ├── contracts/
+│   │   ├── IHuespedService.ts
+│   │   ├── IHabitacionService.ts
+│   │   ├── IReservaService.ts
+│   │   ├── IEstadiaService.ts
+│   │   ├── IPagoService.ts
+│   │   └── ITarifaService.ts
+│   │
+│   ├── memory/
+│   │   ├── HuespedServiceMemory.ts
+│   │   ├── HabitacionServiceMemory.ts
+│   │   ├── ReservaServiceMemory.ts
+│   │   ├── EstadiaServiceMemory.ts
+│   │   ├── PagoServiceMemory.ts
+│   │   ├── TarifaServiceMemory.ts
+│   │   └── _utils.ts
+│   │
+│   └── mysql/                  # después
+│       ├── HuespedServiceMySQL.ts
+│       ├── HabitacionServiceMySQL.ts
+│       ├── ReservaServiceMySQL.ts
+│       ├── EstadiaServiceMySQL.ts
+│       ├── PagoServiceMySQL.ts
+│       └── TarifaServiceMySQL.ts
+│
+├── routes/
+│   ├── huesped.routes.ts
+│   ├── habitacion.routes.ts
+│   ├── reserva.routes.ts
+│   ├── estadia.routes.ts
+│   ├── pago.routes.ts
+│   └── tarifa.routes.ts
+│
+└── utils/
+    ├── strings.ts
+    ├── date.ts
+    └── errors.ts

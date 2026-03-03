@@ -1,0 +1,12 @@
+# Node
+**/node_modules/
+**/dist/
+
+# Env
+**/.env
+
+# Logs
+*.log
+
+# Datos JSON (si no quieres subirlos)
+**/data/*.json
