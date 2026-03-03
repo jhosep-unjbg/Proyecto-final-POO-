@@ -50,7 +50,7 @@ h1, h2, h3 { font-family: "Cormorant Garamond", serif; letter-spacing: .2px; }
 .view { display: none; gap: 12px; animation: fadeSlide .35s ease; }
 .view.active { display: grid; }
 .card { background: linear-gradient(180deg, color-mix(in oklab, var(--card) 95%, #fff 5%), var(--card)); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: 0 10px 24px rgba(0,0,0,.15); }
-.hero { display: flex; justify-content: space-between; gap: 20px; align-items: center; position: relative; overflow: hidden; }
+.hero { display: flex; justify-content: space-between; gap: 20px; align-items: center; position: relative; overflow: hidden; background-image: linear-gradient(rgba(13,17,26,.72), rgba(13,17,26,.72)), url("https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1500&q=80"); background-size: cover; background-position: center; }
 .hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(circle at 2px 2px, color-mix(in oklab, var(--gold) 30%, transparent) 0.5px, transparent 0.5px); background-size: 12px 12px; opacity: .12; }
 .hero-metrics { display: grid; grid-template-columns: repeat(2,minmax(120px,1fr)); gap: 8px; min-width: 300px; }
 .hero-pill { border: 1px solid var(--border); border-radius: 12px; padding: 8px 10px; background: color-mix(in oklab, var(--card) 85%, var(--gold) 15%); }
@@ -67,6 +67,11 @@ h1, h2, h3 { font-family: "Cormorant Garamond", serif; letter-spacing: .2px; }
 button { cursor: pointer; font-weight: 600; transition: .2s ease; }
 button:hover { box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 25%, transparent); transform: translateY(-1px); }
 button:focus, input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 20%, transparent); }
+
+
+.hotel-gallery-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.hotel-gallery-grid img { width: 100%; height: 170px; object-fit: cover; border-radius: 12px; border: 1px solid var(--border); transition: transform .2s ease, box-shadow .2s ease; }
+.hotel-gallery-grid img:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,.22); }
 
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .filters { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 8px; }
@@ -114,6 +119,7 @@ th, td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left
 @media (max-width: 1100px) {
   .kpi-grid, .quick-actions .actions { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .charts-grid { grid-template-columns: 1fr; }
+  .hotel-gallery-grid { grid-template-columns: 1fr; }
   .filters { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .split { grid-template-columns: 1fr; }
 }
